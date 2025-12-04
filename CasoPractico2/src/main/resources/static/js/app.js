@@ -1,431 +1,299 @@
-/**
- * JavaScript personalizado para la Plataforma Académica
- */
-
+// Funciones generales para la plataforma
 document.addEventListener('DOMContentLoaded', function() {
     
-    // ===========================================
-    // CONFIRMACIÓN PARA ELIMINACIONES
-    // ===========================================
-    const deleteButtons = document.querySelectorAll('.btn-delete, a[href*="eliminar"]');
+    // Confirmación para eliminar
+    const deleteButtons = document.querySelectorAll('.btn-delete-confirm');
     deleteButtons.forEach(button => {
         button.addEventListener('click', function(e) {
-            if (!confirm('¿Estás seguro de que deseas eliminar este registro? Esta acción no se puede deshacer.')) {
+            if (!confirm('¿Está seguro de que desea eliminar este registro?')) {
                 e.preventDefault();
-                e.stopPropagation();
             }
         });
     });
     
-    // ===========================================
-    // AUTO-OCULTAR ALERTAS DESPUÉS DE 5 SEGUNDOS
-    // ===========================================
-    setTimeout(function() {
-        const alerts = document.querySelectorAll('.alert:not(.alert-permanent)');
-        alerts.forEach(alert => {
-            const closeButton = alert.querySelector('.btn-close');
-            if (closeButton) {
-                closeButton.click();
-            } else {
-                alert.style.opacity = '0';
-                alert.style.transition = 'opacity 0.5s ease';
-                setTimeout(() => alert.remove(), 500);
-            }
-        });
-    }, 5000);
-    
-    // ===========================================
-    // FORMATEAR FECHAS
-    // ===========================================
-    const fechaElements = document.querySelectorAll('.fecha-formateada');
-    fechaElements.forEach(element => {
-        const fechaTexto = element.textContent.trim();
-        if (fechaTexto) {
-            try {
-                const fecha = new Date(fechaTexto);
-                if (!isNaN(fecha)) {
-                    element.textContent = fecha.toLocaleDateString('es-ES', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-                }
-            } catch (error) {
-                console.log('Error formateando fecha:', error);
-            }
-        }
-    });
-    
-    // ===========================================
-    // VALIDACIÓN DE FORMULARIOS
-    // ===========================================
-    const forms = document.querySelectorAll('.needs-validation');
+    // Validación de formularios
+    const forms = document.querySelectorAll('form');
     forms.forEach(form => {
-        form.addEventListener('submit', function(event) {
-            if (!form.checkValidity()) {
-                event.preventDefault();
-                event.stopPropagation();
-                
-                // Resaltar campos inválidos
-                const invalidFields = form.querySelectorAll(':invalid');
-                invalidFields.forEach(field => {
+        form.addEventListener('submit', function(e) {
+            const requiredFields = form.querySelectorAll('[required]');
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
                     field.classList.add('is-invalid');
                     
                     // Crear mensaje de error si no existe
                     if (!field.nextElementSibling || !field.nextElementSibling.classList.contains('invalid-feedback')) {
                         const errorDiv = document.createElement('div');
                         errorDiv.className = 'invalid-feedback';
-                        errorDiv.textContent = field.validationMessage || 'Este campo es obligatorio';
-                        field.parentNode.insertBefore(errorDiv, field.nextSibling);
+                        errorDiv.textContent = 'Este campo es requerido';
+                        field.parentNode.appendChild(errorDiv);
                     }
-                });
-            }
-            form.classList.add('was-validated');
-        }, false);
-        
-        // Limpiar validación cuando el usuario escribe
-        form.querySelectorAll('input, select, textarea').forEach(field => {
-            field.addEventListener('input', function() {
-                if (this.classList.contains('is-invalid')) {
-                    this.classList.remove('is-invalid');
-                    const errorDiv = this.nextElementSibling;
-                    if (errorDiv && errorDiv.classList.contains('invalid-feedback')) {
-                        errorDiv.remove();
-                    }
+                } else {
+                    field.classList.remove('is-invalid');
+                    field.classList.add('is-valid');
                 }
             });
+            
+            if (!isValid) {
+                e.preventDefault();
+                showToast('Por favor, complete todos los campos requeridos', 'error');
+            }
         });
     });
     
-    // ===========================================
-    // TOOLTIPS
-    // ===========================================
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-    
-    // ===========================================
-    // POPOVERS
-    // ===========================================
-    const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
-    popoverTriggerList.map(function (popoverTriggerEl) {
-        return new bootstrap.Popover(popoverTriggerEl);
-    });
-    
-    // ===========================================
-    // TOGGLE PASSWORD VISIBILITY
-    // ===========================================
+    // Mostrar/ocultar contraseña
     const togglePasswordButtons = document.querySelectorAll('.toggle-password');
     togglePasswordButtons.forEach(button => {
         button.addEventListener('click', function() {
-            const passwordInput = this.previousElementSibling;
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-            
-            // Cambiar ícono
+            const input = document.querySelector(this.getAttribute('data-target'));
             const icon = this.querySelector('i');
-            if (type === 'text') {
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-                this.setAttribute('aria-label', 'Ocultar contraseña');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
             } else {
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-                this.setAttribute('aria-label', 'Mostrar contraseña');
+                input.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
             }
         });
     });
     
-    // ===========================================
-    // CONTADOR DE CARACTERES PARA TEXTAREAS
-    // ===========================================
-    const textareas = document.querySelectorAll('textarea[maxlength]');
-    textareas.forEach(textarea => {
-        const maxLength = textarea.getAttribute('maxlength');
-        const counterId = textarea.id + '-counter';
-        
-        // Crear contador
-        const counter = document.createElement('small');
-        counter.id = counterId;
-        counter.className = 'form-text text-muted float-end';
-        counter.textContent = '0/' + maxLength;
-        
-        textarea.parentNode.appendChild(counter);
-        
-        // Actualizar contador
-        textarea.addEventListener('input', function() {
-            const currentLength = this.value.length;
-            counter.textContent = currentLength + '/' + maxLength;
+    // Auto-ocultar mensajes de alerta
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            alert.style.opacity = '0';
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 300);
+        }, 5000);
+    });
+    
+    // Filtro en tablas
+    const tableFilters = document.querySelectorAll('.table-filter');
+    tableFilters.forEach(filter => {
+        filter.addEventListener('keyup', function() {
+            const value = this.value.toLowerCase();
+            const tableId = this.getAttribute('data-table');
+            const table = document.getElementById(tableId);
+            const rows = table.querySelectorAll('tbody tr');
             
-            if (currentLength >= maxLength) {
-                counter.classList.remove('text-muted');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(value) ? '' : 'none';
+            });
+        });
+    });
+    
+    // Contador de caracteres
+    const charCounters = document.querySelectorAll('.char-counter');
+    charCounters.forEach(counter => {
+        const input = document.getElementById(counter.getAttribute('data-input'));
+        const max = parseInt(counter.getAttribute('data-max')) || 255;
+        
+        input.addEventListener('input', function() {
+            const current = this.value.length;
+            counter.textContent = `${current}/${max}`;
+            
+            if (current > max) {
                 counter.classList.add('text-danger');
             } else {
                 counter.classList.remove('text-danger');
-                counter.classList.add('text-muted');
             }
         });
         
-        // Actualizar al cargar (para editores)
-        textarea.dispatchEvent(new Event('input'));
+        // Inicializar contador
+        counter.textContent = `${input.value.length}/${max}`;
     });
-    
-    // ===========================================
-    // SIDEBAR TOGGLE PARA MÓVIL
-    // ===========================================
-    const sidebarToggle = document.querySelector('.sidebar-toggle');
-    const sidebar = document.querySelector('.sidebar');
-    
-    if (sidebarToggle && sidebar) {
-        sidebarToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('show');
-            this.classList.toggle('active');
-        });
-    }
-    
-    // ===========================================
-    // BUSQUEDA EN TABLAS
-    // ===========================================
-    const searchInputs = document.querySelectorAll('.table-search');
-    searchInputs.forEach(input => {
-        input.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const tableId = this.getAttribute('data-table');
-            const table = document.getElementById(tableId);
-            
-            if (table) {
-                const rows = table.querySelectorAll('tbody tr');
-                rows.forEach(row => {
-                    const text = row.textContent.toLowerCase();
-                    if (text.includes(searchTerm)) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
-            }
-        });
-    });
-    
-    // ===========================================
-    // ORDENACIÓN DE TABLAS
-    // ===========================================
-    const sortableHeaders = document.querySelectorAll('th.sortable');
-    sortableHeaders.forEach(header => {
-        header.style.cursor = 'pointer';
-        header.addEventListener('click', function() {
-            const table = this.closest('table');
-            const columnIndex = Array.from(this.parentNode.children).indexOf(this);
-            const isAscending = !this.classList.contains('asc');
-            
-            // Limpiar otras columnas
-            table.querySelectorAll('th.sortable').forEach(th => {
-                th.classList.remove('asc', 'desc');
-            });
-            
-            // Establecer dirección
-            this.classList.toggle('asc', isAscending);
-            this.classList.toggle('desc', !isAscending);
-            
-            // Ordenar filas
-            const tbody = table.querySelector('tbody');
-            const rows = Array.from(tbody.querySelectorAll('tr'));
-            
-            rows.sort((a, b) => {
-                const aValue = a.children[columnIndex].textContent.trim();
-                const bValue = b.children[columnIndex].textContent.trim();
-                
-                // Intentar convertir a número si es posible
-                const aNum = parseFloat(aValue);
-                const bNum = parseFloat(bValue);
-                
-                let comparison = 0;
-                if (!isNaN(aNum) && !isNaN(bNum)) {
-                    comparison = aNum - bNum;
-                } else {
-                    comparison = aValue.localeCompare(bValue, 'es', { sensitivity: 'base' });
-                }
-                
-                return isAscending ? comparison : -comparison;
-            });
-            
-            // Reinsertar filas ordenadas
-            rows.forEach(row => tbody.appendChild(row));
-        });
-    });
-    
-    // ===========================================
-    // EXPORTACIÓN DE DATOS (SIMULADA)
-    // ===========================================
-    const exportButtons = document.querySelectorAll('.btn-export');
-    exportButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-            const format = this.getAttribute('data-format') || 'csv';
-            const tableId = this.getAttribute('data-table');
-            const table = document.getElementById(tableId);
-            
-            if (table) {
-                alert(`Exportando tabla en formato ${format.toUpperCase()}...\n(Esta es una simulación. En producción, se implementaría la lógica real de exportación.)`);
-                
-                // Aquí iría la lógica real de exportación
-                // Por ejemplo, para CSV:
-                if (format === 'csv') {
-                    let csv = [];
-                    const rows = table.querySelectorAll('tr');
-                    
-                    rows.forEach(row => {
-                        const rowData = [];
-                        row.querySelectorAll('th, td').forEach(cell => {
-                            // Excluir celdas de acción
-                            if (!cell.querySelector('.btn')) {
-                                rowData.push(`"${cell.textContent.trim()}"`);
-                            }
-                        });
-                        csv.push(rowData.join(','));
-                    });
-                    
-                    // Crear y descargar archivo
-                    const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `exportacion_${new Date().toISOString().split('T')[0]}.csv`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    window.URL.revokeObjectURL(url);
-                }
-            }
-        });
-    });
-    
-    // ===========================================
-    // CARGA DE IMÁGENES DE PERFIL
-    // ===========================================
-    const imageUploads = document.querySelectorAll('.image-upload');
-    imageUploads.forEach(upload => {
-        upload.addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                const preview = document.getElementById(this.getAttribute('data-preview'));
-                
-                reader.onload = function(e) {
-                    if (preview) {
-                        preview.src = e.target.result;
-                        preview.style.display = 'block';
-                    }
-                };
-                
-                reader.readAsDataURL(file);
-            }
-        });
-    });
-    
-    // ===========================================
-    // INICIALIZACIÓN DE SELECT2 (SI ESTÁ DISPONIBLE)
-    // ===========================================
-    if (typeof $ !== 'undefined' && $.fn.select2) {
-        $('.select2').select2({
-            theme: 'bootstrap-5',
-            placeholder: 'Seleccione una opción',
-            allowClear: true
-        });
-    }
-    
-    // ===========================================
-    // MENSAJES DE CONFIRMACIÓN PARA ACTUALIZACIONES
-    // ===========================================
-    const saveButtons = document.querySelectorAll('button[type="submit"]:not(.no-confirm)');
-    saveButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const form = this.closest('form');
-            if (form && form.classList.contains('was-validated')) {
-                // Mostrar spinner de carga
-                const originalText = this.innerHTML;
-                this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
-                this.disabled = true;
-                
-                // Restaurar después de 2 segundos (simulación)
-                setTimeout(() => {
-                    this.innerHTML = originalText;
-                    this.disabled = false;
-                }, 2000);
-            }
-        });
-    });
-    
-    // ===========================================
-    // ACTUALIZACIÓN AUTOMÁTICA DE ESTADÍSTICAS
-    // ===========================================
-    if (window.location.pathname.includes('dashboard')) {
-        setInterval(() => {
-            // Simular actualización de estadísticas
-            const statsElements = document.querySelectorAll('.stat-value');
-            statsElements.forEach(element => {
-                const currentValue = parseInt(element.textContent);
-                if (!isNaN(currentValue)) {
-                    // Incremento aleatorio pequeño para simular cambios
-                    const change = Math.floor(Math.random() * 3) - 1; // -1, 0, o 1
-                    const newValue = Math.max(0, currentValue + change);
-                    element.textContent = newValue;
-                    
-                    // Animación
-                    element.style.transform = 'scale(1.1)';
-                    setTimeout(() => {
-                        element.style.transform = 'scale(1)';
-                    }, 300);
-                }
-            });
-        }, 10000); // Cada 10 segundos
-    }
-    
-    // ===========================================
-    // DETECCIÓN DE CONEXIÓN
-    // ===========================================
-    window.addEventListener('online', function() {
-        showNotification('success', 'Conexión restablecida', 'Ya estás conectado a internet.');
-    });
-    
-    window.addEventListener('offline', function() {
-        showNotification('warning', 'Conexión perdida', 'Estás trabajando sin conexión. Los cambios se guardarán localmente.');
-    });
-    
-    // ===========================================
-    // NOTIFICACIONES PERSONALIZADAS
-    // ===========================================
-    window.showNotification = function(type, title, message) {
-        // Crear contenedor de notificaciones si no existe
-        let notificationContainer = document.getElementById('notification-container');
-        if (!notificationContainer) {
-            notificationContainer = document.createElement('div');
-            notificationContainer.id = 'notification-container';
-            notificationContainer.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; width: 300px;';
-            document.body.appendChild(notificationContainer);
-        }
-        
-        // Crear notificación
-        const notification = document.createElement('div');
-        notification.className = `alert alert-${type} alert-dismissible fade show`;
-        notification.innerHTML = `
-            <strong>${title}</strong>
-            <div>${message}</div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+});
+
+// Función para mostrar notificaciones tipo toast
+function showToast(message, type = 'info') {
+    // Crear contenedor si no existe
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         `;
-        
-        notificationContainer.appendChild(notification);
-        
-        // Auto-eliminar después de 5 segundos
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.remove();
-            }
-        }, 5000);
-    };
+        document.body.appendChild(container);
+    }
     
-    console.log('Plataforma Académica - JavaScript cargado correctamente');
+    // Crear toast
+    const toast = document.createElement('div');
+    toast.className = `toast bg-${type} text-white`;
+    toast.style.cssText = `
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        animation: slideIn 0.3s ease-out;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-width: 300px;
+    `;
+    
+    // Contenido del toast
+    toast.innerHTML = `
+        <div style="flex: 1;">
+            <i class="bi ${getIconForType(type)} me-2"></i>
+            ${message}
+        </div>
+        <button type="button" class="btn-close btn-close-white" 
+                onclick="this.parentElement.remove()" 
+                style="margin-left: 15px;">
+        </button>
+    `;
+    
+    // Agregar toast al contenedor
+    container.appendChild(toast);
+    
+    // Auto-eliminar después de 5 segundos
+    setTimeout(() => {
+        if (toast.parentElement) {
+            toast.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.remove();
+                }
+            }, 300);
+        }
+    }, 5000);
+}
+
+// Obtener icono según tipo
+function getIconForType(type) {
+    switch(type) {
+        case 'success': return 'bi-check-circle-fill';
+        case 'error': return 'bi-exclamation-circle-fill';
+        case 'warning': return 'bi-exclamation-triangle-fill';
+        default: return 'bi-info-circle-fill';
+    }
+}
+
+// Agregar estilos de animación
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+    
+    .is-valid {
+        border-color: #198754 !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e") !important;
+    }
+    
+    .is-invalid {
+        border-color: #dc3545 !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e") !important;
+    }
+    
+    .invalid-feedback {
+        display: block;
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+`;
+document.head.appendChild(style);
+
+// Función para exportar tabla a CSV
+function exportTableToCSV(tableId, filename) {
+    const table = document.getElementById(tableId);
+    const rows = table.querySelectorAll('tr');
+    const csv = [];
+    
+    rows.forEach(row => {
+        const cols = row.querySelectorAll('td, th');
+        const rowData = [];
+        
+        cols.forEach(col => {
+            // Remover botones y elementos no deseados
+            const clone = col.cloneNode(true);
+            const buttons = clone.querySelectorAll('button, a');
+            buttons.forEach(btn => btn.remove());
+            rowData.push(clone.textContent.trim());
+        });
+        
+        csv.push(rowData.join(','));
+    });
+    
+    const csvString = csv.join('\n');
+    const blob = new Blob([csvString], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    
+    a.setAttribute('hidden', '');
+    a.setAttribute('href', url);
+    a.setAttribute('download', filename || 'export.csv');
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
+// Función para volver arriba
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+
+// Contador de usuarios en línea (simulado)
+function updateOnlineUsers() {
+    const onlineBadge = document.querySelector('.footer .badge.bg-success');
+    if (onlineBadge) {
+        // Simular cambio en usuarios en línea
+        const baseUsers = 12;
+        const randomChange = Math.floor(Math.random() * 5) - 2; // -2 a +2
+        const newCount = Math.max(5, baseUsers + randomChange);
+        onlineBadge.textContent = newCount;
+    }
+}
+
+// Actualizar cada 30 segundos
+setInterval(updateOnlineUsers, 30000);
+
+// Inicializar cuando se carga la página
+document.addEventListener('DOMContentLoaded', function() {
+    // Agregar año actual al copyright
+    const yearSpan = document.querySelector('[data-current-year]');
+    if (yearSpan) {
+        yearSpan.textContent = new Date().getFullYear();
+    }
+    
+    // Mostrar año en el copyright si no está
+    const copyrightText = document.querySelector('.footer p:first-child');
+    if (copyrightText && !copyrightText.textContent.includes('2024')) {
+        copyrightText.innerHTML = copyrightText.innerHTML.replace('2024', new Date().getFullYear());
+    }
 });

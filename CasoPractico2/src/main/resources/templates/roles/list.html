@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layout/base}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head>
+    <title>Gestión de Roles - Plataforma Académica</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Header de la página -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="h4 fw-bold mb-1">
+                    <i class="bi bi-shield-check me-2 text-primary"></i>
+                    Gestión de Roles
+                </h2>
+                <p class="text-muted mb-0">
+                    Administra los roles y permisos del sistema. Cada rol define qué puede hacer un usuario.
+                </p>
+            </div>
+            <div>
+                <button sec:authorize="hasAuthority('ADMIN')" 
+                        class="btn btn-primary" 
+                        onclick="location.href='/admin/roles/nuevo'">
+                    <i class="bi bi-plus-circle me-1"></i>
+                    Nuevo Rol
+                </button>
+            </div>
+        </div>
+
+        <!-- Alertas de éxito/error -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <span th:text="${mensaje}">Operación exitosa</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <span th:text="${mensaje}">Error en la operación</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Tarjetas de Estadísticas -->
+        <div class="row mb-4">
+            <div class="col-md-3 col-6">
+                <div class="card border-start border-primary border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted">Total Roles</h6>
+                                <h4 class="mb-0" th:text="${totalRoles}">0</h4>
+                            </div>
+                            <div class="avatar-sm bg-primary rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-shield-check text-white fs-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 col-6">
+                <div class="card border-start border-danger border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted">Administradores</h6>
+                                <h4 class="mb-0" th:text="${totalAdmin}">0</h4>
+                            </div>
+                            <div class="avatar-sm bg-danger rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-shield-fill-check text-white fs-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 col-6">
+                <div class="card border-start border-warning border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted">Profesores</h6>
+                                <h4 class="mb-0" th:text="${totalProfesor}">0</h4>
+                            </div>
+                            <div class="avatar-sm bg-warning rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-person-badge text-white fs-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 col-6">
+                <div class="card border-start border-info border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted">Estudiantes</h6>
+                                <h4 class="mb-0" th:text="${totalEstudiante}">0</h4>
+                            </div>
+                            <div class="avatar-sm bg-info rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-person text-white fs-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de Roles -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-list-ul me-2"></i>
+                    Roles del Sistema
+                    <span class="badge bg-primary ms-2" th:text="${roles.size()}">0</span>
+                </h5>
+                <div class="d-flex align-items-center">
+                    <input type="text" 
+                           class="form-control form-control-sm" 
+                           placeholder="Buscar rol..." 
+                           style="width: 200px;"
+                           id="searchRoles"
+                           onkeyup="filterRoles()">
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="rolesTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="60">ID</th>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Usuarios</th>
+                                <th>Permisos</th>
+                                <th width="120" class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="rol : ${roles}" class="align-middle">
+                                <!-- ID -->
+                                <td>
+                                    <span class="badge bg-secondary">#<span th:text="${rol.id}"></span></span>
+                                </td>
+                                
+                                <!-- Nombre -->
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm me-3" 
+                                             th:classappend="${rol.nombre == 'ADMIN'} ? 'bg-danger' :
+                                                            ${rol.nombre == 'PROFESOR'} ? 'bg-warning' : 'bg-info'"
+                                             style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                            <i th:class="${rol.nombre == 'ADMIN'} ? 'bi bi-shield-fill text-white' :
+                                                        ${rol.nombre == 'PROFESOR'} ? 'bi bi-person-badge text-white' : 'bi bi-person text-white'"></i>
+                                        </div>
+                                        <div>
+                                            <strong th:text="${rol.nombre}"></strong><br>
+                                            <small class="text-muted">Creado: <span th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy')}"></span></small>
+                                        </div>
+                                    </div>
+                                </td>
+                                
+                                <!-- Descripción -->
+                                <td>
+                                    <div style="max-width: 250px;">
+                                        <p class="mb-0 small" th:text="${rol.descripcion ?: 'Sin descripción'}"></p>
+                                    </div>
+                                </td>
+                                
+                                <!-- Usuarios -->
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3">
+                                            <h5 class="mb-0" th:text="${rol.usuarios != null ? rol.usuarios.size() : 0}">0</h5>
+                                            <small class="text-muted">usuarios</small>
+                                        </div>
+                                        <div th:if="${rol.usuarios != null and rol.usuarios.size() > 0}">
+                                            <div class="avatar-stack">
+                                                <div th:each="usuario, stat : ${rol.usuarios}" 
+                                                     th:if="${stat.index < 3}"
+                                                     class="avatar-xs" 
+                                                     th:title="${usuario.nombre}"
+                                                     style="width: 24px; height: 24px; background: #e9ecef; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-left: -8px; border: 2px solid white;">
+                                                    <small class="text-muted" th:text="${#strings.substring(usuario.nombre, 0, 1)}"></small>
+                                                </div>
+                                                <div th:if="${rol.usuarios.size() > 3}" 
+                                                     class="avatar-xs bg-secondary text-white"
+                                                     style="width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-left: -8px; border: 2px solid white;">
+                                                    <small>+<span th:text="${rol.usuarios.size() - 3}"></span></small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                
+                                <!-- Permisos -->
+                                <td>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        <span th:if="${rol.nombre == 'ADMIN'}" class="badge bg-danger">CRUD Usuarios</span>
+                                        <span th:if="${rol.nombre == 'ADMIN'}" class="badge bg-danger">CRUD Roles</span>
+                                        <span th:if="${rol.nombre == 'ADMIN' or rol.nombre == 'PROFESOR'}" class="badge bg-warning">Ver Reportes</span>
+                                        <span th:if="${rol.nombre == 'ADMIN' or rol.nombre == 'PROFESOR'}" class="badge bg-warning">Consultas</span>
+                                        <span class="badge bg-info">Ver Perfil</span>
+                                        <span th:if="${rol.nombre == 'ESTUDIANTE'}" class="badge bg-secondary">Acceso Limitado</span>
+                                    </div>
+                                </td>
+                                
+                                <!-- Acciones -->
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <!-- Editar -->
+                                        <a th:href="@{'/admin/roles/editar/' + ${rol.id}}" 
+                                           class="btn btn-outline-warning">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        
+                                        <!-- Eliminar -->
+                                        <button type="button" 
+                                                class="btn btn-outline-danger" 
+                                                th:disabled="${rol.usuarios != null and rol.usuarios.size() > 0 or rol.nombre == 'ADMIN'}"
+                                                th:title="${rol.usuarios != null and rol.usuarios.size() > 0} ? 'No se puede eliminar, tiene usuarios asignados' : 
+                                                          ${rol.nombre == 'ADMIN'} ? 'No se puede eliminar el rol ADMIN' : 'Eliminar rol'"
+                                                onclick="confirmarEliminarRol(${rol.id}, '${rol.nombre}', ${rol.usuarios != null ? rol.usuarios.size() : 0})">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                        
+                                        <!-- Ver Detalles -->
+                                        <button type="button" 
+                                                class="btn btn-outline-info" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#detalleRolModal"
+                                                th:data-rol-id="${rol.id}"
+                                                onclick="verDetalleRol(this)">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Mensaje si no hay roles -->
+                            <tr th:if="${roles.empty}">
+                                <td colspan="6" class="text-center py-5">
+                                    <i class="bi bi-shield display-6 text-muted mb-3 d-block"></i>
+                                    <h5 class="text-muted">No hay roles configurados</h5>
+                                    <p class="text-muted">Comienza creando los roles básicos del sistema.</p>
+                                    <a th:href="@{/admin/roles/nuevo}" class="btn btn-primary">
+                                        <i class="bi bi-plus-circle me-1"></i>
+                                        Crear Primer Rol
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Roles Predefinidos (solo información) -->
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Roles Predefinidos del Sistema
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card border-danger mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title text-danger">
+                                    <i class="bi bi-shield-fill-check me-2"></i>
+                                    ADMIN
+                                </h6>
+                                <p class="card-text small">Acceso completo al sistema. Puede gestionar usuarios, roles y todas las configuraciones.</p>
+                                <div class="text-muted small">
+                                    <i class="bi bi-people me-1"></i>
+                                    <span th:text="${totalAdmin}">0</span> usuarios
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-warning mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title text-warning">
+                                    <i class="bi bi-person-badge me-2"></i>
+                                    PROFESOR
+                                </h6>
+                                <p class="card-text small">Acceso a reportes y consultas. Puede ver información de estudiantes y generar reportes.</p>
+                                <div class="text-muted small">
+                                    <i class="bi bi-people me-1"></i>
+                                    <span th:text="${totalProfesor}">0</span> usuarios
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-info mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title text-info">
+                                    <i class="bi bi-person me-2"></i>
+                                    ESTUDIANTE
+                                </h6>
+                                <p class="card-text small">Acceso limitado. Solo puede ver y editar su propio perfil. No tiene permisos administrativos.</p>
+                                <div class="text-muted small">
+                                    <i class="bi bi-people me-1"></i>
+                                    <span th:text="${totalEstudiante}">0</span> usuarios
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Detalles del Rol -->
+    <div class="modal fade" id="detalleRolModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-shield-check me-2"></i>
+                        Detalles del Rol
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="detalleRolContent">
+                    <!-- Contenido cargado dinámicamente -->
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                        <p class="mt-2">Cargando información del rol...</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <a href="#" id="editarRolBtn" class="btn btn-primary">
+                        <i class="bi bi-pencil me-1"></i>
+                        Editar Rol
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div layout:fragment="scripts">
+        <style>
+            .avatar-sm {
+                transition: transform 0.2s ease;
+            }
+            
+            .avatar-sm:hover {
+                transform: scale(1.1);
+            }
+            
+            .avatar-xs {
+                transition: transform 0.2s ease;
+            }
+            
+            .avatar-xs:hover {
+                transform: scale(1.2);
+                z-index: 1;
+                position: relative;
+            }
+            
+            .avatar-stack {
+                display: flex;
+            }
+            
+            .badge {
+                font-size: 0.75rem;
+                padding: 0.3em 0.6em;
+            }
+            
+            .table tbody tr {
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+            }
+            
+            .table tbody tr:hover {
+                background-color: rgba(52, 152, 219, 0.05);
+            }
+            
+            .btn-group-sm .btn {
+                padding: 0.25rem 0.5rem;
+                border-radius: 4px !important;
+            }
+            
+            .btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+        </style>
+        
+        <script>
+            // Filtrar roles en la tabla
+            function filterRoles() {
+                const input = document.getElementById('searchRoles');
+                const filter = input.value.toLowerCase();
+                const table = document.getElementById('rolesTable');
+                const rows = table.getElementsByTagName('tr');
+                
+                for (let i = 1; i < rows.length; i++) {
+                    const row = rows[i];
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(filter) ? '' : 'none';
+                }
+            }
+            
+            // Confirmar eliminación de rol
+            function confirmarEliminarRol(id, nombre, usuariosCount) {
+                if (usuariosCount > 0) {
+                    alert(`No se puede eliminar el rol "${nombre}" porque tiene ${usuariosCount} usuarios asignados.`);
+                    return;
+                }
+                
+                if (nombre === 'ADMIN') {
+                    alert('No se puede eliminar el rol ADMIN. Es requerido por el sistema.');
+                    return;
+                }
+                
+                if (confirm(`¿Está seguro de eliminar el rol "${nombre}"? Esta acción no se puede deshacer.`)) {
+                    window.location.href = `/admin/roles/eliminar/${id}`;
+                }
+            }
+            
+            // Ver detalles del rol
+            function verDetalleRol(button) {
+                const rolId = button.getAttribute('data-rol-id');
+                const row = button.closest('tr');
+                const nombre = row.querySelector('td:nth-child(2) strong').textContent;
+                const descripcion = row.querySelector('td:nth-child(3) p').textContent;
+                const usuariosCount = row.querySelector('td:nth-child(4) h5').textContent;
+                
+                // Actualizar enlace de editar
+                document.getElementById('editarRolBtn').href = `/admin/roles/editar/${rolId}`;
+                
+                // Mostrar información del rol
+                document.getElementById('detalleRolContent').innerHTML = `
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <div class="mb-4">
+                                <div class="avatar-lg mx-auto mb-3" 
+                                     style="width: 100px; height: 100px; background: #4ecdc4; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                    <i class="bi bi-shield-check text-white fs-1"></i>
+                                </div>
+                                <h4>${nombre}</h4>
+                                <p class="text-muted mb-0">ID: #${rolId}</p>
+                            </div>
+                            
+                            <div class="card border-0 bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">Usuarios Asignados</h6>
+                                    <h2 class="text-primary">${usuariosCount}</h2>
+                                    <small class="text-muted">usuarios con este rol</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-8">
+                            <div class="mb-4">
+                                <h6 class="text-muted mb-2">Descripción</h6>
+                                <p>${descripcion || 'Sin descripción disponible'}</p>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h6 class="text-muted mb-2">Permisos</h6>
+                                <div class="d-flex flex-wrap gap-2 mb-3">
+                                    ${getPermisosParaRol(nombre)}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h6 class="text-muted mb-2">URLs Permitidas</h6>
+                                <ul class="list-unstyled small">
+                                    ${getURLsParaRol(nombre)}
+                                </ul>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <small>Los permisos de este rol están definidos en la configuración de seguridad de Spring Boot.</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Obtener permisos según el rol
+            function getPermisosParaRol(nombre) {
+                const permisos = {
+                    'ADMIN': ['CRUD Usuarios', 'CRUD Roles', 'Ver Reportes', 'Consultas Avanzadas', 'Ver Perfil', 'Configuración'],
+                    'PROFESOR': ['Ver Reportes', 'Consultas Avanzadas', 'Ver Perfil'],
+                    'ESTUDIANTE': ['Ver Perfil']
+                };
+                
+                const colores = {
+                    'ADMIN': 'danger',
+                    'PROFESOR': 'warning',
+                    'ESTUDIANTE': 'info'
+                };
+                
+                const color = colores[nombre] || 'secondary';
+                const listaPermisos = permisos[nombre] || ['Acceso Básico'];
+                
+                return listaPermisos.map(permiso => 
+                    `<span class="badge bg-${color}">${permiso}</span>`
+                ).join('');
+            }
+            
+            // Obtener URLs según el rol
+            function getURLsParaRol(nombre) {
+                const urls = {
+                    'ADMIN': [
+                        '/admin/usuarios/** (CRUD completo)',
+                        '/admin/roles/** (CRUD completo)',
+                        '/reportes (Ver reportes)',
+                        '/consultas/** (Consultas avanzadas)',
+                        '/perfil (Perfil propio)',
+                        '/home (Dashboard)'
+                    ],
+                    'PROFESOR': [
+                        '/reportes (Ver reportes)',
+                        '/consultas/** (Consultas avanzadas)',
+                        '/perfil (Perfil propio)',
+                        '/home (Dashboard)'
+                    ],
+                    'ESTUDIANTE': [
+                        '/perfil (Perfil propio)',
+                        '/home (Dashboard)'
+                    ]
+                };
+                
+                const listaURLs = urls[nombre] || ['/perfil (Perfil propio)'];
+                
+                return listaURLs.map(url => 
+                    `<li><i class="bi bi-check-circle text-success me-2"></i> ${url}</li>`
+                ).join('');
+            }
+            
+            // Auto-ocultar alertas
+            setTimeout(() => {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        </script>
+    </div>
+</body>
+</html>

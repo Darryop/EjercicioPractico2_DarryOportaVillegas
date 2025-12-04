@@ -4,8 +4,6 @@ package EjercicioPractico.demo.service;
  *
  * @author darry
  */
-
-
 import EjercicioPractico.demo.domain.Rol;
 import java.util.List;
 
@@ -15,7 +13,4 @@ public interface RolService {
     Rol obtenerPorId(Long id);
     void eliminar(Long id);
     Rol buscarPorNombre(String nombre);
-    boolean existePorNombre(String nombre);
-    List<Rol> buscarRolesPorTermino(String termino);
-    long contarRoles();
 }

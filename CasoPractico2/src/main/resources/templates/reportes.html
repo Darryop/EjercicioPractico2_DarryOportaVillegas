@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Reportes - Plataforma Académica</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <h2 class="h4 mb-4">
+            <i class="bi bi-bar-chart me-2"></i>
+            Reportes del Sistema
+        </h2>
+
+        <div class="row">
+            <!-- Estadísticas -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Estadísticas de Usuarios</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center">
+                            <h3 th:text="${totalUsuarios}">0</h3>
+                            <p class="text-muted">Total Usuarios</p>
+                        </div>
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <h5 th:text="${totalActivos}">0</h5>
+                                <small class="text-muted">Activos</small>
+                            </div>
+                            <div class="col-4">
+                                <h5 th:text="${totalInactivos}">0</h5>
+                                <small class="text-muted">Inactivos</small>
+                            </div>
+                            <div class="col-4">
+                                <h5 th:text="${totalAdmins}">0</h5>
+                                <small class="text-muted">Admins</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Por Roles -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Distribución por Roles</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <strong>ADMIN:</strong> <span th:text="${totalAdmins}">0</span> usuarios
+                            </li>
+                            <li class="mb-2">
+                                <strong>PROFESOR:</strong> <span th:text="${totalProfesores}">0</span> usuarios
+                            </li>
+                            <li>
+                                <strong>ESTUDIANTE:</strong> <span th:text="${totalEstudiantes}">0</span> usuarios
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Últimos Registros -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Últimos Usuarios Registrados</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Rol</th>
+                        <th>Fecha</th>
+                    </tr>
+                    <tr th:each="usuario : ${ultimosUsuarios}">
+                        <td th:text="${usuario.nombre + ' ' + usuario.apellido}"></td>
+                        <td th:text="${usuario.email}"></td>
+                        <td th:text="${usuario.rol.nombre}"></td>
+                        <td th:text="${#dates.format(usuario.fechaCreacion, 'dd/MM/yyyy')}"></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

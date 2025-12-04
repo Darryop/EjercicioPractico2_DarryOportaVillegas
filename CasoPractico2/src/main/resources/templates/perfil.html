@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layout/base}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <title>Mi Perfil - Plataforma Académica</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="row">
+            <!-- Columna Izquierda: Información del Perfil -->
+            <div class="col-lg-4 col-md-5 mb-4">
+                <!-- Tarjeta de Perfil -->
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-primary text-white text-center py-4">
+                        <div class="avatar-container mb-3">
+                            <div class="avatar-circle mx-auto" 
+                                 style="width: 100px; height: 100px; background: #4ecdc4; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <span class="text-white display-5 fw-bold" 
+                                      th:text="${#strings.substring(usuario.nombre, 0, 1) + #strings.substring(usuario.apellido, 0, 1)}">
+                                    US
+                                </span>
+                            </div>
+                        </div>
+                        <h4 class="mb-1" th:text="${usuario.nombre + ' ' + usuario.apellido}">Nombre Usuario</h4>
+                        <span class="badge bg-light text-dark" th:text="${usuario.rol.nombre}">ROL</span>
+                    </div>
+                    <div class="card-body">
+                        <!-- Información Básica -->
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-3">
+                                <i class="bi bi-info-circle me-2"></i>
+                                Información Básica
+                            </h6>
+                            <div class="mb-2">
+                                <small class="text-muted d-block">Email</small>
+                                <strong th:text="${usuario.email}">email@ejemplo.com</strong>
+                            </div>
+                            <div class="mb-2">
+                                <small class="text-muted d-block">Estado</small>
+                                <span th:if="${usuario.activo}" class="badge bg-success">Activo</span>
+                                <span th:unless="${usuario.activo}" class="badge bg-danger">Inactivo</span>
+                            </div>
+                            <div class="mb-2">
+                                <small class="text-muted d-block">Fecha de Registro</small>
+                                <strong th:text="${#dates.format(usuario.fechaCreacion, 'dd/MM/yyyy HH:mm')}">01/01/2024</strong>
+                            </div>
+                        </div>
+                        
+                        <!-- Estadísticas -->
+                        <div class="mb-3">
+                            <h6 class="text-muted mb-3">
+                                <i class="bi bi-bar-chart me-2"></i>
+                                Actividad
+                            </h6>
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <div class="p-2 border rounded bg-light">
+                                        <h5 class="mb-0 text-primary">0</h5>
+                                        <small class="text-muted">Sesiones</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="p-2 border rounded bg-light">
+                                        <h5 class="mb-0 text-success">0</h5>
+                                        <small class="text-muted">Actividades</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Acciones Rápidas -->
+                        <div>
+                            <h6 class="text-muted mb-3">
+                                <i class="bi bi-lightning me-2"></i>
+                                Acciones
+                            </h6>
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-outline-primary btn-sm" 
+                                        data-bs-toggle="modal" data-bs-target="#cambiarPasswordModal">
+                                    <i class="bi bi-key me-1"></i>
+                                    Cambiar Contraseña
+                                </button>
+                                <a th:href="@{/}" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-house me-1"></i>
+                                    Volver al Inicio
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Columna Derecha: Detalles y Edición -->
+            <div class="col-lg-8 col-md-7">
+                <!-- Alertas de éxito/error -->
+                <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    Perfil actualizado exitosamente
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                
+                <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    Error al actualizar el perfil
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                
+                <!-- Tarjeta de Edición -->
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white border-bottom">
+                        <h5 class="mb-0">
+                            <i class="bi bi-pencil-square me-2 text-primary"></i>
+                            Editar Información Personal
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/perfil/actualizar}" method="post" th:object="${usuario}">
+                            <input type="hidden" th:field="*{id}">
+                            <input type="hidden" th:field="*{rol.id}">
+                            <input type="hidden" th:field="*{password}">
+                            
+                            <div class="row">
+                                <!-- Nombre -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="nombre" class="form-label">
+                                        <i class="bi bi-person me-1"></i>
+                                        Nombre
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="nombre" 
+                                           th:field="*{nombre}"
+                                           required>
+                                    <div class="form-text">
+                                        Ingrese su nombre de pila
+                                    </div>
+                                </div>
+                                
+                                <!-- Apellido -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="apellido" class="form-label">
+                                        <i class="bi bi-person-badge me-1"></i>
+                                        Apellido
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="apellido" 
+                                           th:field="*{apellido}"
+                                           required>
+                                    <div class="form-text">
+                                        Ingrese su apellido
+                                    </div>
+                                </div>
+                                
+                                <!-- Email -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="form-label">
+                                        <i class="bi bi-envelope me-1"></i>
+                                        Correo Electrónico
+                                    </label>
+                                    <input type="email" 
+                                           class="form-control" 
+                                           id="email" 
+                                           th:field="*{email}"
+                                           required>
+                                    <div class="form-text">
+                                        Este email se usará para iniciar sesión
+                                    </div>
+                                </div>
+                                
+                                <!-- Rol (solo lectura) -->
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-shield-check me-1"></i>
+                                        Rol
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           th:value="${usuario.rol.nombre}"
+                                           readonly
+                                           disabled>
+                                    <div class="form-text">
+                                        Para cambiar de rol, contacte al administrador
+                                    </div>
+                                </div>
+                                
+                                <!-- Estado (solo ADMIN puede cambiar) -->
+                                <div class="col-md-6 mb-3" sec:authorize="hasAuthority('ADMIN')">
+                                    <label class="form-label">
+                                        <i class="bi bi-toggle-on me-1"></i>
+                                        Estado
+                                    </label>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" 
+                                               type="checkbox" 
+                                               id="activo"
+                                               th:checked="${usuario.activo}"
+                                               th:field="*{activo}">
+                                        <label class="form-check-label" for="activo">
+                                            Usuario Activo
+                                        </label>
+                                    </div>
+                                    <div class="form-text">
+                                        Desactive para suspender el acceso
+                                    </div>
+                                </div>
+                                
+                                <!-- Fecha Creación (solo lectura) -->
+                                <div class="col-md-6 mb-4">
+                                    <label class="form-label">
+                                        <i class="bi bi-calendar me-1"></i>
+                                        Fecha de Registro
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           th:value="${#dates.format(usuario.fechaCreacion, 'dd/MM/yyyy HH:mm')}"
+                                           readonly
+                                           disabled>
+                                </div>
+                            </div>
+                            
+                            <!-- Botones -->
+                            <div class="d-flex justify-content-between mt-4">
+                                <button type="reset" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-clockwise me-1"></i>
+                                    Restablecer
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save me-1"></i>
+                                    Guardar Cambios
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Actividad Reciente -->
+                <div class="card shadow-sm border-0 mt-4">
+                    <div class="card-header bg-white border-bottom">
+                        <h5 class="mb-0">
+                            <i class="bi bi-clock-history me-2 text-primary"></i>
+                            Actividad Reciente
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="timeline">
+                            <div class="timeline-item mb-3">
+                                <div class="timeline-badge bg-success">
+                                    <i class="bi bi-check-circle"></i>
+                                </div>
+                                <div class="timeline-content ms-4">
+                                    <h6 class="mb-1">Sesión iniciada</h6>
+                                    <p class="text-muted small mb-0">Hoy a las <span th:text="${#dates.format(#dates.createNow(), 'HH:mm')}">10:30</span></p>
+                                </div>
+                            </div>
+                            <div class="timeline-item mb-3">
+                                <div class="timeline-badge bg-info">
+                                    <i class="bi bi-pencil"></i>
+                                </div>
+                                <div class="timeline-content ms-4">
+                                    <h6 class="mb-1">Perfil actualizado</h6>
+                                    <p class="text-muted small mb-0">Ayer a las 14:20</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-badge bg-warning">
+                                    <i class="bi bi-key"></i>
+                                </div>
+                                <div class="timeline-content ms-4">
+                                    <h6 class="mb-1">Contraseña cambiada</h6>
+                                    <p class="text-muted small mb-0">15/11/2024</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para Cambiar Contraseña -->
+    <div class="modal fade" id="cambiarPasswordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-key me-2"></i>
+                        Cambiar Contraseña
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form th:action="@{/perfil/cambiar-password}" method="post">
+                        <div class="mb-3">
+                            <label for="currentPassword" class="form-label">Contraseña Actual</label>
+                            <input type="password" class="form-control" id="currentPassword" name="currentPassword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">Nueva Contraseña</label>
+                            <input type="password" class="form-control" id="newPassword" name="newPassword" required>
+                            <div class="form-text">Mínimo 8 caracteres, con letras y números</div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
+                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Cambiar Contraseña</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div layout:fragment="scripts">
+        <style>
+            /* Estilos para timeline */
+            .timeline {
+                position: relative;
+            }
+            
+            .timeline::before {
+                content: '';
+                position: absolute;
+                left: 20px;
+                top: 0;
+                bottom: 0;
+                width: 2px;
+                background: #e9ecef;
+            }
+            
+            .timeline-item {
+                position: relative;
+                display: flex;
+                align-items: flex-start;
+            }
+            
+            .timeline-badge {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                z-index: 1;
+                flex-shrink: 0;
+            }
+            
+            .timeline-content {
+                flex: 1;
+            }
+            
+            /* Avatar */
+            .avatar-circle {
+                transition: transform 0.3s ease;
+            }
+            
+            .avatar-circle:hover {
+                transform: scale(1.05);
+            }
+        </style>
+        
+        <script>
+            // Validar que las contraseñas coincidan
+            document.getElementById('cambiarPasswordModal').addEventListener('shown.bs.modal', function() {
+                const form = this.querySelector('form');
+                form.addEventListener('submit', function(e) {
+                    const newPass = document.getElementById('newPassword').value;
+                    const confirmPass = document.getElementById('confirmPassword').value;
+                    
+                    if (newPass !== confirmPass) {
+                        e.preventDefault();
+                        alert('Las contraseñas no coinciden');
+                        return false;
+                    }
+                    
+                    if (newPass.length < 8) {
+                        e.preventDefault();
+                        alert('La contraseña debe tener al menos 8 caracteres');
+                        return false;
+                    }
+                    
+                    return true;
+                });
+            });
+            
+            // Auto-ocultar alertas
+            setTimeout(() => {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        </script>
+    </div>
+</body>
+</html>

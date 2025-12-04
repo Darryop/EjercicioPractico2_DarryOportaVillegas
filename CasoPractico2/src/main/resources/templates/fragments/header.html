@@ -1,49 +1,27 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-</head>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
 <body>
-    <!-- Header Fragment -->
-    <div th:fragment="header">
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-            <div class="container-fluid">
-                <a class="navbar-brand" th:href="@{/dashboard}">
-                    <i class="fas fa-graduation-cap"></i>
-                    <span class="ms-2">Plataforma Académica</span>
-                </a>
+    <header th:fragment="header" class="bg-dark text-white">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center py-3">
+                <div>
+                    <a th:href="@{/home}" class="logo text-decoration-none">
+                        <i class="bi bi-mortarboard-fill"></i>
+                        <span class="ms-2">Plataforma Académica</span>
+                    </a>
+                    <p class="mb-0 text-white-50 small">Gestión de Usuarios y Roles</p>
+                </div>
                 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
-                        data-bs-target="#navbarSupportedContent">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                        <li class="nav-item" sec:authorize="isAuthenticated()">
-                            <span class="navbar-text me-3">
-                                <i class="fas fa-user-circle me-1"></i>
-                                <span sec:authentication="name"></span>
-                            </span>
-                        </li>
-                        <li class="nav-item" sec:authorize="isAuthenticated()">
-                            <form th:action="@{/logout}" method="post" class="d-inline">
-                                <button class="btn btn-outline-light btn-sm" type="submit">
-                                    <i class="fas fa-sign-out-alt"></i>
-                                    <span class="ms-1">Cerrar Sesión</span>
-                                </button>
-                            </form>
-                        </li>
-                        <li class="nav-item" sec:authorize="!isAuthenticated()">
-                            <a class="nav-link" th:href="@{/login}">
-                                <i class="fas fa-sign-in-alt"></i>
-                                <span class="ms-1">Iniciar Sesión</span>
-                            </a>
-                        </li>
-                    </ul>
+                <div sec:authorize="isAuthenticated()" class="text-end">
+                    <small class="text-white-50">
+                        <i class="bi bi-person-circle me-1"></i>
+                        <span sec:authentication="name"></span>
+                        <span class="badge bg-warning text-dark ms-2" sec:authentication="principal.authorities"></span>
+                    </small>
                 </div>
             </div>
-        </nav>
-    </div>
+        </div>
+    </header>
 </body>
 </html>

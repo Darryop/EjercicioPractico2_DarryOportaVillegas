@@ -6,71 +6,61 @@ package EjercicioPractico.demo.controller;
  */
 
 
-
-import EjercicioPractico.demo.domain.Rol;
 import EjercicioPractico.demo.domain.Usuario;
-import EjercicioPractico.demo.service.RolService;
 import EjercicioPractico.demo.service.UsuarioService;
-import org.springframework.beans.factory.annotation.Autowired;
+import EjercicioPractico.demo.service.RolService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/admin/usuarios")
 public class UsuarioController {
     
-    @Autowired
-    private UsuarioService usuarioService;
+    private final UsuarioService usuarioService;
+    private final RolService rolService;
     
-    @Autowired
-    private RolService rolService;
+    public UsuarioController(UsuarioService usuarioService, RolService rolService) {
+        this.usuarioService = usuarioService;
+        this.rolService = rolService;
+    }
     
     @GetMapping
-    public String listarUsuarios(Model model) {
-        List<Usuario> usuarios = usuarioService.listarTodos();
-        model.addAttribute("usuarios", usuarios);
-        return "admin/usuarios/listar";
+    public String listar(Model model) {
+        model.addAttribute("usuarios", usuarioService.listarTodos());
+        model.addAttribute("roles", rolService.listarTodos());
+        return "usuarios/list";
     }
     
     @GetMapping("/nuevo")
-    public String mostrarFormularioNuevo(Model model) {
-        Usuario usuario = new Usuario();
-        List<Rol> roles = rolService.listarTodos();
-        
-        model.addAttribute("usuario", usuario);
-        model.addAttribute("roles", roles);
-        return "admin/usuarios/formulario";
-    }
-    
-    @PostMapping("/guardar")
-    public String guardarUsuario(@ModelAttribute Usuario usuario) {
-        usuarioService.guardar(usuario);
-        return "redirect:/admin/usuarios";
+    public String nuevoForm(Model model) {
+        model.addAttribute("usuario", new Usuario());
+        model.addAttribute("roles", rolService.listarTodos());
+        model.addAttribute("titulo", "Nuevo Usuario");
+        return "usuarios/form";
     }
     
     @GetMapping("/editar/{id}")
-    public String mostrarFormularioEditar(@PathVariable Long id, Model model) {
+    public String editarForm(@PathVariable Long id, Model model) {
         Usuario usuario = usuarioService.obtenerPorId(id);
-        List<Rol> roles = rolService.listarTodos();
-        
         model.addAttribute("usuario", usuario);
-        model.addAttribute("roles", roles);
-        return "admin/usuarios/formulario";
+        model.addAttribute("roles", rolService.listarTodos());
+        model.addAttribute("titulo", "Editar Usuario");
+        return "usuarios/form";
     }
     
-    @GetMapping("/eliminar/{id}")
-    public String eliminarUsuario(@PathVariable Long id) {
-        usuarioService.eliminar(id);
+    @PostMapping("/guardar")
+    public String guardar(@ModelAttribute Usuario usuario, RedirectAttributes redirectAttributes) {
+        usuarioService.guardar(usuario);
+        redirectAttributes.addFlashAttribute("success", "Usuario guardado exitosamente");
         return "redirect:/admin/usuarios";
     }
     
-    @GetMapping("/detalle/{id}")
-    public String verDetalle(@PathVariable Long id, Model model) {
-        Usuario usuario = usuarioService.obtenerPorId(id);
-        model.addAttribute("usuario", usuario);
-        return "admin/usuarios/detalle";
+    @GetMapping("/eliminar/{id}")
+    public String eliminar(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        usuarioService.eliminar(id);
+        redirectAttributes.addFlashAttribute("success", "Usuario eliminado exitosamente");
+        return "redirect:/admin/usuarios";
     }
 }

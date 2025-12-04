@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layout/base}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head>
+    <title>Gestión de Usuarios - Plataforma Académica</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Header de la página -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="h4 fw-bold mb-1">
+                    <i class="bi bi-people me-2 text-primary"></i>
+                    Gestión de Usuarios
+                </h2>
+                <p class="text-muted mb-0">
+                    Administra los usuarios del sistema. <span sec:authorize="hasAuthority('ADMIN')">Puedes crear, editar y eliminar usuarios.</span>
+                </p>
+            </div>
+            <div>
+                <button sec:authorize="hasAuthority('ADMIN')" 
+                        class="btn btn-primary" 
+                        onclick="location.href='/admin/usuarios/nuevo'">
+                    <i class="bi bi-person-plus me-1"></i>
+                    Nuevo Usuario
+                </button>
+            </div>
+        </div>
+
+        <!-- Filtros y Búsqueda -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <form th:action="@{/admin/usuarios/buscar}" method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="buscar" class="form-label">Buscar</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="buscar" 
+                               name="texto"
+                               placeholder="Nombre, apellido o email...">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="rol" class="form-label">Rol</label>
+                        <select class="form-select" id="rol" name="rolId">
+                            <option value="">Todos los roles</option>
+                            <option th:each="rol : ${roles}" 
+                                    th:value="${rol.id}" 
+                                    th:text="${rol.nombre}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="estado" class="form-label">Estado</label>
+                        <select class="form-select" id="estado" name="activo">
+                            <option value="">Todos</option>
+                            <option value="true">Activos</option>
+                            <option value="false">Inactivos</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-search me-1"></i>
+                            Filtrar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card border-start border-primary border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted">Total Usuarios</h6>
+                                <h4 class="mb-0" th:text="${totalUsuarios}">0</h4>
+                            </div>
+                            <div class="avatar-sm bg-primary rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-people text-white fs-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-start border-success border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted">Activos</h6>
+                                <h4 class="mb-0" th:text="${totalActivos}">0</h4>
+                            </div>
+                            <div class="avatar-sm bg-success rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-check-circle text-white fs-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-start border-warning border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted">Inactivos</h6>
+                                <h4 class="mb-0" th:text="${totalInactivos}">0</h4>
+                            </div>
+                            <div class="avatar-sm bg-warning rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-x-circle text-white fs-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-start border-info border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted">Administradores</h6>
+                                <h4 class="mb-0" th:text="${totalAdmins}">0</h4>
+                            </div>
+                            <div class="avatar-sm bg-info rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-shield-check text-white fs-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de Usuarios -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-list-ul me-2"></i>
+                    Lista de Usuarios
+                    <span class="badge bg-primary ms-2" th:text="${usuarios.size()}">0</span>
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="50">ID</th>
+                                <th>Usuario</th>
+                                <th>Rol</th>
+                                <th>Email</th>
+                                <th>Estado</th>
+                                <th>Fecha Registro</th>
+                                <th width="150" class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="usuario : ${usuarios}" class="align-middle">
+                                <!-- ID -->
+                                <td>
+                                    <span class="badge bg-secondary">#<span th:text="${usuario.id}"></span></span>
+                                </td>
+                                
+                                <!-- Nombre y Apellido -->
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle-sm me-3" 
+                                             th:style="'background-color:' + ${#strings.substring(usuario.email, 0, 1) == 'c' ? '#3498db' : 
+                                                                              #strings.substring(usuario.email, 0, 1) == 'a' ? '#2ecc71' : 
+                                                                              '#9b59b6'}"
+                                             style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                            <span class="text-white fw-bold" 
+                                                  th:text="${#strings.substring(usuario.nombre, 0, 1) + #strings.substring(usuario.apellido, 0, 1)}">
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <strong th:text="${usuario.nombre + ' ' + usuario.apellido}"></strong><br>
+                                            <small class="text-muted" th:text="${usuario.email}"></small>
+                                        </div>
+                                    </div>
+                                </td>
+                                
+                                <!-- Rol -->
+                                <td>
+                                    <span class="badge" 
+                                          th:classappend="${usuario.rol.nombre == 'ADMIN'} ? 'bg-danger' :
+                                                         ${usuario.rol.nombre == 'PROFESOR'} ? 'bg-warning' : 'bg-info'"
+                                          th:text="${usuario.rol.nombre}">
+                                    </span>
+                                </td>
+                                
+                                <!-- Email -->
+                                <td>
+                                    <a th:href="'mailto:' + ${usuario.email}" class="text-decoration-none">
+                                        <i class="bi bi-envelope me-1"></i>
+                                        <span th:text="${usuario.email}"></span>
+                                    </a>
+                                </td>
+                                
+                                <!-- Estado -->
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div th:classappend="${usuario.activo} ? 'bg-success' : 'bg-danger'" 
+                                             style="width: 10px; height: 10px; border-radius: 50%; margin-right: 8px;"></div>
+                                        <span th:if="${usuario.activo}" class="text-success fw-semibold">Activo</span>
+                                        <span th:unless="${usuario.activo}" class="text-danger fw-semibold">Inactivo</span>
+                                    </div>
+                                </td>
+                                
+                                <!-- Fecha Registro -->
+                                <td>
+                                    <small th:text="${#dates.format(usuario.fechaCreacion, 'dd/MM/yyyy')}"></small><br>
+                                    <small class="text-muted" th:text="${#dates.format(usuario.fechaCreacion, 'HH:mm')}"></small>
+                                </td>
+                                
+                                <!-- Acciones -->
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <!-- Ver Detalles -->
+                                        <button type="button" 
+                                                class="btn btn-outline-info" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#detalleModal"
+                                                th:data-usuario-id="${usuario.id}"
+                                                th:data-usuario-nombre="${usuario.nombre}"
+                                                th:data-usuario-apellido="${usuario.apellido}"
+                                                onclick="verDetalle(this)">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        
+                                        <!-- Editar -->
+                                        <a th:href="@{'/admin/usuarios/editar/' + ${usuario.id}}" 
+                                           class="btn btn-outline-warning">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        
+                                        <!-- Eliminar -->
+                                        <button type="button" 
+                                                class="btn btn-outline-danger" 
+                                                th:if="${usuario.rol.nombre != 'ADMIN' or #authentication.principal.username != usuario.email}"
+                                                onclick="confirmarEliminar(${usuario.id}, '${usuario.nombre}')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Mensaje si no hay usuarios -->
+                            <tr th:if="${usuarios.empty}">
+                                <td colspan="7" class="text-center py-5">
+                                    <i class="bi bi-people display-6 text-muted mb-3 d-block"></i>
+                                    <h5 class="text-muted">No hay usuarios registrados</h5>
+                                    <p class="text-muted">Comienza agregando un nuevo usuario.</p>
+                                    <a th:href="@{/admin/usuarios/nuevo}" class="btn btn-primary">
+                                        <i class="bi bi-person-plus me-1"></i>
+                                        Agregar Primer Usuario
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Paginación -->
+            <div class="card-footer bg-white" th:if="${totalPaginas > 1}">
+                <nav aria-label="Paginación">
+                    <ul class="pagination justify-content-center mb-0">
+                        <li class="page-item" th:classappend="${paginaActual == 1} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/usuarios(page=${paginaActual-1})}">Anterior</a>
+                        </li>
+                        
+                        <li th:each="i : ${#numbers.sequence(1, totalPaginas)}" 
+                            class="page-item" 
+                            th:classappend="${i == paginaActual} ? 'active'">
+                            <a class="page-link" th:href="@{/admin/usuarios(page=${i})}" th:text="${i}"></a>
+                        </li>
+                        
+                        <li class="page-item" th:classappend="${paginaActual == totalPaginas} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/usuarios(page=${paginaActual+1})}">Siguiente</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Detalles -->
+    <div class="modal fade" id="detalleModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-person-badge me-2"></i>
+                        Detalles del Usuario
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="detalleUsuarioContent">
+                    <!-- Contenido cargado dinámicamente -->
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                        <p class="mt-2">Cargando información del usuario...</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <a href="#" id="editarUsuarioBtn" class="btn btn-primary">
+                        <i class="bi bi-pencil me-1"></i>
+                        Editar Usuario
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div layout:fragment="scripts">
+        <style>
+            .avatar-circle-sm {
+                transition: transform 0.2s ease;
+            }
+            
+            .avatar-circle-sm:hover {
+                transform: scale(1.1);
+            }
+            
+            .avatar-sm {
+                width: 45px;
+                height: 45px;
+            }
+            
+            .table tbody tr {
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+            }
+            
+            .table tbody tr:hover {
+                background-color: rgba(52, 152, 219, 0.05);
+            }
+            
+            .btn-group-sm .btn {
+                padding: 0.25rem 0.5rem;
+                border-radius: 4px !important;
+            }
+        </style>
+        
+        <script>
+            // Confirmar eliminación
+            function confirmarEliminar(id, nombre) {
+                if (confirm(`¿Está seguro de eliminar al usuario "${nombre}"? Esta acción no se puede deshacer.`)) {
+                    window.location.href = `/admin/usuarios/eliminar/${id}`;
+                }
+            }
+            
+            // Ver detalles del usuario
+            function verDetalle(button) {
+                const usuarioId = button.getAttribute('data-usuario-id');
+                const nombre = button.getAttribute('data-usuario-nombre');
+                const apellido = button.getAttribute('data-usuario-apellido');
+                
+                // Actualizar enlace de editar
+                document.getElementById('editarUsuarioBtn').href = `/admin/usuarios/editar/${usuarioId}`;
+                
+                // Mostrar información básica mientras se carga
+                document.getElementById('detalleUsuarioContent').innerHTML = `
+                    <div class="text-center py-3">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                        <p class="mt-2">Cargando información de ${nombre} ${apellido}...</p>
+                    </div>
+                `;
+                
+                // Aquí podrías hacer una llamada AJAX para obtener más detalles
+                // Por ahora mostramos información básica
+                setTimeout(() => {
+                    document.getElementById('detalleUsuarioContent').innerHTML = `
+                        <div class="row">
+                            <div class="col-md-4 text-center">
+                                <div class="mb-3">
+                                    <div class="avatar-circle mx-auto mb-3" 
+                                         style="width: 80px; height: 80px; background: #4ecdc4; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                        <span class="text-white fs-3 fw-bold">${nombre.charAt(0)}${apellido.charAt(0)}</span>
+                                    </div>
+                                    <h5>${nombre} ${apellido}</h5>
+                                    <p class="text-muted mb-0">ID: #${usuarioId}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="row mb-3">
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Email</small>
+                                        <strong>${button.closest('tr').querySelector('a[href^="mailto:"]').textContent}</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Rol</small>
+                                        <span>${button.closest('tr').querySelector('td:nth-child(3) .badge').textContent}</span>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Estado</small>
+                                        <span>${button.closest('tr').querySelector('td:nth-child(5) span:nth-child(2)').textContent}</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Fecha Registro</small>
+                                        <strong>${button.closest('tr').querySelector('td:nth-child(6) small:nth-child(1)').textContent}</strong>
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <h6 class="text-muted mb-2">Información Adicional</h6>
+                                    <p class="small text-muted mb-0">
+                                        Este usuario tiene acceso completo al sistema según su rol asignado.
+                                        Puede editar la información haciendo clic en el botón "Editar Usuario".
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }, 500);
+            }
+            
+            // Filtrar en tiempo real
+            document.getElementById('buscar').addEventListener('input', function(e) {
+                const searchText = e.target.value.toLowerCase();
+                const rows = document.querySelectorAll('tbody tr');
+                
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchText) ? '' : 'none';
+                });
+            });
+        </script>
+    </div>
+</body>
+</html>

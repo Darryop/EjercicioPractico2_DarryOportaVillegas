@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layout/base}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <head>
+        <title>Panel de Administración - Plataforma Académica</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <!-- Hero Section -->
+            <div class="hero-section mb-5">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="display-5 fw-bold text-primary mb-3">
+                            <i class="bi bi-shield-check me-3"></i>
+                            Panel de Administración
+                        </h1>
+                        <p class="lead mb-4">
+                            Bienvenido administrador. Desde aquí puedes gestionar usuarios, roles y supervisar toda la plataforma.
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <div class="badge bg-primary p-3 fs-6">
+                            <i class="bi bi-person-badge me-2"></i>
+                            <span sec:authentication="principal.authorities"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tarjetas de Estadísticas -->
+            <div class="row mb-5">
+                <div class="col-md-3 mb-4">
+                    <div class="card text-center border-primary">
+                        <div class="card-body">
+                            <div class="icon-lg mb-3">
+                                <i class="bi bi-people-fill text-primary fs-1"></i>
+                            </div>
+                            <h3 class="card-title" th:text="${totalUsuarios ?: '0'}">0</h3>
+                            <p class="card-text text-muted">Usuarios Totales</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-4">
+                    <div class="card text-center border-success">
+                        <div class="card-body">
+                            <div class="icon-lg mb-3">
+                                <i class="bi bi-check-circle-fill text-success fs-1"></i>
+                            </div>
+                            <h3 class="card-title" th:text="${totalActivos ?: '0'}">0</h3>
+                            <p class="card-text text-muted">Usuarios Activos</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-4">
+                    <div class="card text-center border-warning">
+                        <div class="card-body">
+                            <div class="icon-lg mb-3">
+                                <i class="bi bi-shield-fill-check text-warning fs-1"></i>
+                            </div>
+                            <h3 class="card-title" th:text="${totalAdmins ?: '0'}">0</h3>
+                            <p class="card-text text-muted">Administradores</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-4">
+                    <div class="card text-center border-info">
+                        <div class="card-body">
+                            <div class="icon-lg mb-3">
+                                <i class="bi bi-graph-up-arrow text-info fs-1"></i>
+                            </div>
+                            <h3 class="card-title" th:text="${totalInactivos ?: '0'}">0</h3>
+                            <p class="card-text text-muted">Usuarios Inactivos</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de Acciones Rápidas -->
+            <!-- En las Acciones Rápidas -->
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <a th:href="@{/admin/usuarios/nuevo}" class="btn btn-primary w-100 h-100 py-3">
+                        <i class="bi bi-person-plus display-6 mb-2 d-block"></i>
+                        Nuevo Usuario
+                    </a>
+                </div>
+
+                <div class="col-md-3">
+                    <a th:href="@{/admin/roles/nuevo}" class="btn btn-success w-100 h-100 py-3">
+                        <i class="bi bi-plus-circle display-6 mb-2 d-block"></i>
+                        Nuevo Rol
+                    </a>
+                </div>
+
+                <div class="col-md-3">
+                    <a th:href="@{/consultas/avanzadas}" class="btn btn-info w-100 h-100 py-3">
+                        <i class="bi bi-search display-6 mb-2 d-block"></i>
+                        Consultas
+                    </a>
+                </div>
+
+                <div class="col-md-3">
+                    <a th:href="@{/reportes}" class="btn btn-warning w-100 h-100 py-3">
+                        <i class="bi bi-bar-chart display-6 mb-2 d-block"></i>
+                        Reportes
+                    </a>
+                </div>
+            </div>
+
+            <!-- Módulos Principales -->
+            <div class="row mb-5">
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-white border-bottom">
+                            <h5 class="mb-0">
+                                <i class="bi bi-people text-primary me-2"></i>
+                                Gestión de Usuarios
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">
+                                Administra todos los usuarios del sistema: crear, editar, eliminar y asignar roles.
+                            </p>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    CRUD completo de usuarios
+                                </li>
+                                <li class="mb-2">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    Asignación de roles
+                                </li>
+                                <li class="mb-2">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    Activación/desactivación
+                                </li>
+                                <li>
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    Reset de contraseñas
+                                </li>
+                            </ul>
+                            <a th:href="@{/admin/usuarios}" class="btn btn-outline-primary mt-3">
+                                <i class="bi bi-arrow-right me-1"></i>
+                                Ir a Gestión de Usuarios
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-white border-bottom">
+                            <h5 class="mb-0">
+                                <i class="bi bi-shield text-success me-2"></i>
+                                Gestión de Roles
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">
+                                Define y administra los roles del sistema y sus permisos correspondientes.
+                            </p>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    Crear nuevos roles
+                                </li>
+                                <li class="mb-2">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    Editar permisos existentes
+                                </li>
+                                <li class="mb-2">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    Ver usuarios por rol
+                                </li>
+                                <li>
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    Sistema de 3 roles básicos
+                                </li>
+                            </ul>
+                            <a th:href="@{/admin/roles}" class="btn btn-outline-success mt-3">
+                                <i class="bi bi-arrow-right me-1"></i>
+                                Ir a Gestión de Roles
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Última Actividad -->
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock-history text-primary me-2"></i>
+                        Actividad Reciente
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Usuario</th>
+                                    <th>Rol</th>
+                                    <th>Fecha Registro</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="usuario : ${ultimosUsuarios ?: []}">
+                                    <td>
+                                        <strong th:text="${usuario.nombre + ' ' + usuario.apellido}"></strong>
+                                        <br>
+                                        <small class="text-muted" th:text="${usuario.email}"></small>
+                                    </td>
+                                    <td>
+                                        <span class="badge" 
+                                              th:classappend="${usuario.rol.nombre == 'ADMIN'} ? 'bg-danger' :
+                                              ${usuario.rol.nombre == 'PROFESOR'} ? 'bg-warning' : 'bg-info'"
+                                              th:text="${usuario.rol.nombre}">
+                                        </span>
+                                    </td>
+                                    <td th:text="${#dates.format(usuario.fechaCreacion, 'dd/MM/yyyy HH:mm')}"></td>
+                                    <td>
+                                        <span th:if="${usuario.activo}" class="badge bg-success">Activo</span>
+                                        <span th:unless="${usuario.activo}" class="badge bg-danger">Inactivo</span>
+                                    </td>
+                                </tr>
+                                <tr th:if="${ultimosUsuarios == null or ultimosUsuarios.empty}">
+                                    <td colspan="4" class="text-center text-muted py-4">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        No hay actividad reciente para mostrar
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div layout:fragment="scripts">
+            <style>
+                /* Estilos específicos para home-admin */
+                .hero-section {
+                    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                    padding: 2rem;
+                    border-radius: 15px;
+                    border-left: 5px solid #3498db;
+                }
+
+                .icon-lg {
+                    width: 80px;
+                    height: 80px;
+                    margin: 0 auto;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .card {
+                    transition: all 0.3s ease;
+                }
+
+                .card:hover {
+                    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+                }
+
+                .btn.w-100.h-100 {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .btn.w-100.h-100 .display-6 {
+                    font-size: 2.5rem;
+                }
+            </style>
+
+            <script>
+                // Actualizar estadísticas cada 60 segundos
+                function updateStats() {
+                    console.log('Actualizando estadísticas...');
+                    // Aquí podrías agregar llamadas AJAX si quieres estadísticas en tiempo real
+                }
+
+                // Iniciar actualización periódica
+                setInterval(updateStats, 60000);
+
+                // Mostrar mensaje de bienvenida
+                document.addEventListener('DOMContentLoaded', function () {
+                    const username = document.querySelector('[sec\\:authentication="name"]');
+                    if (username) {
+                        console.log('Bienvenido administrador:', username.textContent);
+                    }
+                });
+            </script>
+        </div>
+    </body>
+</html>

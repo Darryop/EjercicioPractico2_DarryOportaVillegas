@@ -4,8 +4,8 @@ package EjercicioPractico.demo.domain;
  *
  * @author darry
  */
+
 import jakarta.persistence.*;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -15,33 +15,58 @@ public class Rol {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(unique = true, nullable = false, length = 100)
+    @Column(nullable = false, unique = true)
     private String nombre;
     
-    @Column(length = 255)
     private String descripcion;
     
-    @OneToMany(mappedBy = "rol", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Usuario> usuarios = new ArrayList<>();
+    @OneToMany(mappedBy = "rol")
+    private List<Usuario> usuarios;
     
-    // Constructores
+    // Constructor vacío
     public Rol() {}
     
+    // Constructor con parámetros
     public Rol(String nombre, String descripcion) {
         this.nombre = nombre;
         this.descripcion = descripcion;
     }
     
     // Getters y Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
     
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
+    public void setId(Long id) {
+        this.id = id;
+    }
     
-    public String getDescripcion() { return descripcion; }
-    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+    public String getNombre() {
+        return nombre;
+    }
     
-    public List<Usuario> getUsuarios() { return usuarios; }
-    public void setUsuarios(List<Usuario> usuarios) { this.usuarios = usuarios; }
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+    
+    public String getDescripcion() {
+        return descripcion;
+    }
+    
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+    
+    public List<Usuario> getUsuarios() {
+        return usuarios;
+    }
+    
+    public void setUsuarios(List<Usuario> usuarios) {
+        this.usuarios = usuarios;
+    }
+    
+    @Override
+    public String toString() {
+        return nombre;
+    }
 }
