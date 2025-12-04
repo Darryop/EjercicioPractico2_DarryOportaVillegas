@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Detalle Usuario</title>
+</head>
+<body>
+    <div th:fragment="contenido">
+        <h2>
+            <i class="fas fa-user-circle me-2"></i>
+            Detalle del Usuario
+        </h2>
+        
+        <div class="card shadow">
+            <div class="card-header" th:classappend="${usuario.rol.nombre == 'ADMIN' ? 'bg-primary text-white' : 
+                                                      usuario.rol.nombre == 'PROFESOR' ? 'bg-info text-white' : 
+                                                      'bg-success text-white'}">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <span th:text="${usuario.nombre} + ' ' + ${usuario.apellido}">Carlos Ramírez</span>
+                    </h4>
+                    <span class="badge" th:classappend="${usuario.activo ? 'bg-light text-dark' : 'bg-dark'}">
+                        <i class="fas" th:classappend="${usuario.activo ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+                        <span th:text="${usuario.activo ? ' Activo' : ' Inactivo'}"> Activo</span>
+                    </span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Información Principal -->
+                    <div class="col-md-8">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-muted">Nombre Completo</h6>
+                                <p class="h5" th:text="${usuario.nombre} + ' ' + ${usuario.apellido}">Carlos Ramírez</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-muted">Correo Electrónico</h6>
+                                <p class="h5">
+                                    <i class="fas fa-envelope text-primary me-2"></i>
+                                    <span th:text="${usuario.email}">c.ramirez@correo.com</span>
+                                </p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-muted">Rol Asignado</h6>
+                                <p>
+                                    <span class="badge p-2" 
+                                          th:classappend="${usuario.rol.nombre == 'ADMIN' ? 'bg-primary' : 
+                                                          usuario.rol.nombre == 'PROFESOR' ? 'bg-info' : 
+                                                          'bg-success'}"
+                                          th:text="${usuario.rol.nombre}">ADMIN</span>
+                                </p>
+                                <small class="text-muted" th:text="${usuario.rol.descripcion}">
+                                    Administrador del sistema
+                                </small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-muted">Estado de la Cuenta</h6>
+                                <p>
+                                    <span th:if="${usuario.activo}" class="badge bg-success p-2">
+                                        <i class="fas fa-check-circle me-1"></i>
+                                        Activo
+                                    </span>
+                                    <span th:unless="${usuario.activo}" class="badge bg-danger p-2">
+                                        <i class="fas fa-times-circle me-1"></i>
+                                        Inactivo
+                                    </span>
+                                </p>
+                                <small class="text-muted">
+                                    <span th:if="${usuario.activo}">El usuario puede iniciar sesión</span>
+                                    <span th:unless="${usuario.activo}">El usuario NO puede iniciar sesión</span>
+                                </small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-muted">Fecha de Registro</h6>
+                                <p>
+                                    <i class="fas fa-calendar-alt text-primary me-2"></i>
+                                    <span class="fecha-formateada" th:text="${usuario.fechaCreacion}">01/01/2023</span>
+                                </p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-muted">Tiempo en el Sistema</h6>
+                                <p>
+                                    <i class="fas fa-clock text-primary me-2"></i>
+                                    <span th:if="${usuario.fechaCreacion}">
+                                        <span th:text="${#dates.createNow().year - #dates.year(usuario.fechaCreacion)}">1</span> año(s)
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Información Adicional -->
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Información Adicional
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <small class="text-muted">ID del Usuario:</small>
+                                        <p class="mb-2" th:text="${usuario.id}">1</p>
+                                        
+                                        <small class="text-muted">ID del Rol:</small>
+                                        <p class="mb-0" th:text="${usuario.rol.id}">1</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <small class="text-muted">Última Actualización:</small>
+                                        <p class="mb-2" th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy HH:mm')}">Hoy</p>
+                                        
+                                        <small class="text-muted">Contraseña:</small>
+                                        <p class="mb-0">
+                                            <span class="badge bg-secondary">
+                                                <i class="fas fa-lock me-1"></i>
+                                                Encriptada
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Avatar y Acciones -->
+                    <div class="col-md-4">
+                        <div class="text-center mb-4">
+                            <div class="avatar-placeholder mx-auto mb-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center" 
+                                     style="width: 150px; height: 150px; font-size: 4rem; color: white;"
+                                     th:style="'background-color: ' + ${#strings.substring(usuario.nombre,0,1) == 'C' ? '#4e73df' : 
+                                                                       #strings.substring(usuario.nombre,0,1) == 'A' ? '#1cc88a' : 
+                                                                       '#f6c23e'}">
+                                    <span th:text="${#strings.substring(usuario.nombre,0,1).toUpperCase()}">C</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Estadísticas rápidas -->
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <div class="h4 text-primary">1</div>
+                                    <small class="text-muted">Sesiones Hoy</small>
+                                </div>
+                                <div class="col-6">
+                                    <div class="h4 text-success">100%</div>
+                                    <small class="text-muted">Disponibilidad</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Acciones -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-bolt me-2"></i>
+                                    Acciones
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-grid gap-2">
+                                    <a th:href="@{/admin/usuarios/editar/{id}(id=${usuario.id})}" 
+                                       class="btn btn-warning">
+                                        <i class="fas fa-edit me-2"></i>
+                                        Editar Usuario
+                                    </a>
+                                    <button class="btn btn-outline-secondary" onclick="resetPassword()" disabled>
+                                        <i class="fas fa-key me-2"></i>
+                                        Restablecer Contraseña
+                                    </button>
+                                    <a th:href="@{/admin/usuarios}" class="btn btn-outline-primary">
+                                        <i class="fas fa-arrow-left me-2"></i>
+                                        Volver a la Lista
+                                    </a>
+                                    <a th:href="@{/admin/usuarios/eliminar/{id}(id=${usuario.id})}" 
+                                       class="btn btn-danger btn-delete"
+                                       onclick="return confirm('¿Estás seguro de eliminar a ' + '${usuario.nombre}' + ' ' + '${usuario.apellido}' + '? Esta acción no se puede deshacer.')">
+                                        <i class="fas fa-trash me-2"></i>
+                                        Eliminar Usuario
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Estado del Sistema -->
+                        <div class="card mt-3">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-shield-alt me-2"></i>
+                                    Estado del Sistema
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-user-check text-success me-1"></i>
+                                        Autenticación: Verificada
+                                    </small>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-database text-info me-1"></i>
+                                        Datos: Almacenados correctamente
+                                    </small>
+                                </div>
+                                <div>
+                                    <small class="text-muted">
+                                        <i class="fas fa-history text-warning me-1"></i>
+                                        Última verificación: Hoy
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Historial (simulado) -->
+        <div class="card shadow mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-history me-2"></i>
+                    Historial Reciente
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-success"></div>
+                        <div class="timeline-content">
+                            <h6 class="mb-1">Cuenta creada</h6>
+                            <p class="text-muted mb-1">
+                                <small>
+                                    <i class="fas fa-calendar-alt me-1"></i>
+                                    <span class="fecha-formateada" th:text="${usuario.fechaCreacion}">01/01/2023</span>
+                                </small>
+                            </p>
+                            <p class="mb-0 small">El usuario fue registrado en el sistema</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-info"></div>
+                        <div class="timeline-content">
+                            <h6 class="mb-1">Rol asignado</h6>
+                            <p class="text-muted mb-1">
+                                <small>
+                                    <i class="fas fa-user-tag me-1"></i>
+                                    Rol: <span th:text="${usuario.rol.nombre}">ADMIN</span>
+                                </small>
+                            </p>
+                            <p class="mb-0 small">Se asignó el rol de <span th:text="${usuario.rol.nombre}">ADMIN</span></p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-primary"></div>
+                        <div class="timeline-content">
+                            <h6 class="mb-1">Último acceso</h6>
+                            <p class="text-muted mb-1">
+                                <small>
+                                    <i class="fas fa-sign-in-alt me-1"></i>
+                                    Hoy a las <span th:text="${#dates.format(#dates.createNow(), 'HH:mm')}">14:30</span>
+                                </small>
+                            </p>
+                            <p class="mb-0 small">Inició sesión desde la IP 192.168.1.100</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <style>
+                    .timeline {
+                        position: relative;
+                        padding-left: 30px;
+                    }
+                    .timeline-item {
+                        position: relative;
+                        margin-bottom: 20px;
+                    }
+                    .timeline-marker {
+                        position: absolute;
+                        left: -30px;
+                        top: 5px;
+                        width: 12px;
+                        height: 12px;
+                        border-radius: 50%;
+                    }
+                    .timeline-content {
+                        padding-bottom: 10px;
+                        border-left: 2px solid #e3e6f0;
+                        padding-left: 15px;
+                    }
+                    .timeline-item:last-child .timeline-content {
+                        border-left: none;
+                    }
+                </style>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts específicos para detalle -->
+    <div th:fragment="scripts">
+        <script>
+            function resetPassword() {
+                const nombre = document.querySelector('.card-header h4').textContent;
+                if (confirm(`¿Restablecer contraseña para ${nombre}?\n\nSe enviará un correo con instrucciones.`)) {
+                    alert('Instrucciones enviadas al correo del usuario.\n(En producción, esto enviaría un correo real)');
+                }
+            }
+            
+            // Generar color para el avatar basado en el nombre
+            function generateAvatarColor(name) {
+                const colors = [
+                    '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', 
+                    '#e74a3b', '#6f42c1', '#20c9a6', '#fd7e14'
+                ];
+                let hash = 0;
+                for (let i = 0; i < name.length; i++) {
+                    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+                }
+                const index = Math.abs(hash) % colors.length;
+                return colors[index];
+            }
+            
+            // Aplicar color al avatar
+            const avatarElement = document.querySelector('.avatar-placeholder div');
+            if (avatarElement) {
+                const userName = document.querySelector('.card-header h4').textContent;
+                const color = generateAvatarColor(userName);
+                avatarElement.style.backgroundColor = color;
+            }
+        </script>
+    </div>
+</body>
+</html>

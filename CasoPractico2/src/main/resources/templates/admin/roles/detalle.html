@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Detalle Rol</title>
+</head>
+<body>
+    <div th:fragment="contenido">
+        <h2>
+            <i class="fas fa-user-tag me-2"></i>
+            Detalle del Rol
+        </h2>
+        
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card shadow">
+                    <div class="card-header" th:classappend="${rol.nombre == 'ADMIN' ? 'bg-primary text-white' : 
+                                                              rol.nombre == 'PROFESOR' ? 'bg-info text-white' : 
+                                                              'bg-success text-white'}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="mb-0" th:text="${rol.nombre}">ADMIN</h4>
+                            <span class="badge bg-light text-dark">
+                                <i class="fas fa-users me-1"></i>
+                                <span th:text="${#lists.size(rol.usuarios)}">1</span> usuarios
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- Información básica -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h6 class="text-muted">Descripción</h6>
+                                <p th:text="${rol.descripcion}" class="lead">
+                                    Administrador del sistema con acceso completo.
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-muted">ID del Rol</h6>
+                                <p class="h5" th:text="${rol.id}">1</p>
+                                
+                                <h6 class="text-muted mt-3">Fecha de Creación</h6>
+                                <p class="mb-0">
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar-alt me-1"></i>
+                                        Creado con el sistema
+                                    </small>
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Usuarios con este rol -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2">
+                                <i class="fas fa-users me-2"></i>
+                                Usuarios con este Rol
+                                <span class="badge bg-secondary" th:text="${#lists.size(rol.usuarios)}">1</span>
+                            </h5>
+                            
+                            <div th:if="${#lists.isEmpty(rol.usuarios)}" class="text-center py-4">
+                                <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No hay usuarios asignados</h5>
+                                <p class="text-muted">
+                                    Este rol no tiene usuarios asignados actualmente.
+                                </p>
+                            </div>
+                            
+                            <div th:unless="${#lists.isEmpty(rol.usuarios)}" class="table-responsive">
+                                <table class="table table-sm table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Nombre</th>
+                                            <th>Email</th>
+                                            <th>Estado</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="usuario : ${rol.usuarios}">
+                                            <td th:text="${usuario.id}">1</td>
+                                            <td th:text="${usuario.nombre} + ' ' + ${usuario.apellido}">Carlos Ramírez</td>
+                                            <td th:text="${usuario.email}">c.ramirez@correo.com</td>
+                                            <td>
+                                                <span th:if="${usuario.activo}" class="badge bg-success">Activo</span>
+                                                <span th:unless="${usuario.activo}" class="badge bg-danger">Inactivo</span>
+                                            </td>
+                                            <td>
+                                                <a th:href="@{/admin/usuarios/detalle/{id}(id=${usuario.id})}" 
+                                                   class="btn btn-sm btn-outline-info">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Permisos del rol -->
+                        <div>
+                            <h5 class="border-bottom pb-2">
+                                <i class="fas fa-shield-alt me-2"></i>
+                                Permisos Asignados
+                            </h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            <span>Gestión de Usuarios</span>
+                                            <small class="text-muted d-block ms-4">
+                                                Crear, editar, eliminar y ver usuarios
+                                            </small>
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            <span>Gestión de Roles</span>
+                                            <small class="text-muted d-block ms-4">
+                                                Crear, editar y eliminar roles
+                                            </small>
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            <span>Ver Reportes</span>
+                                            <small class="text-muted d-block ms-4">
+                                                Acceso a reportes del sistema
+                                            </small>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            <span>Consultas Avanzadas</span>
+                                            <small class="text-muted d-block ms-4">
+                                                Realizar consultas complejas
+                                            </small>
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            <span>Ver Perfil Personal</span>
+                                            <small class="text-muted d-block ms-4">
+                                                Acceso a información personal
+                                            </small>
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            <span>Acceso al Dashboard</span>
+                                            <small class="text-muted d-block ms-4">
+                                                Panel principal del sistema
+                                            </small>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Panel lateral -->
+            <div class="col-lg-4">
+                <!-- Acciones -->
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-bolt me-2"></i>
+                            Acciones
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a th:href="@{/admin/roles/editar/{id}(id=${rol.id})}" 
+                               class="btn btn-warning">
+                                <i class="fas fa-edit me-2"></i>
+                                Editar Rol
+                            </a>
+                            <a th:href="@{/admin/roles}" class="btn btn-outline-primary">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Volver a la Lista
+                            </a>
+                            <a th:href="@{/admin/roles/eliminar/{id}(id=${rol.id})}" 
+                               class="btn btn-danger btn-delete"
+                               th:if="${#lists.size(rol.usuarios) == 0}"
+                               onclick="return confirm('¿Estás seguro de eliminar el rol ' + '${rol.nombre}' + '?')">
+                                <i class="fas fa-trash me-2"></i>
+                                Eliminar Rol
+                            </a>
+                            <button class="btn btn-danger" disabled
+                                    th:if="${#lists.size(rol.usuarios) > 0}"
+                                    title="No se puede eliminar porque tiene usuarios asignados">
+                                <i class="fas fa-trash me-2"></i>
+                                Eliminar Rol (No disponible)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Estadísticas -->
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-pie me-2"></i>
+                            Estadísticas
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center">
+                            <div class="display-4 text-primary mb-2" th:text="${#lists.size(rol.usuarios)}">1</div>
+                            <p class="text-muted mb-0">Usuarios asignados</p>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="h5 text-success" 
+                                     th:text="${rol.usuarios.?[activo == true].size()}">1</div>
+                                <small class="text-muted">Activos</small>
+                            </div>
+                            <div class="col-6">
+                                <div class="h5 text-danger" 
+                                     th:text="${rol.usuarios.?[activo == false].size()}">0</div>
+                                <small class="text-muted">Inactivos</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Información del sistema -->
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Información del Sistema
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-2">
+                            <small class="text-muted">
+                                <i class="fas fa-database me-1"></i>
+                                Rol del sistema: 
+                                <span th:if="${rol.nombre == 'ADMIN' or rol.nombre == 'PROFESOR' or rol.nombre == 'ESTUDIANTE'}"
+                                      class="text-success">Sí</span>
+                                <span th:unless="${rol.nombre == 'ADMIN' or rol.nombre == 'PROFESOR' or rol.nombre == 'ESTUDIANTE'}"
+                                      class="text-warning">No</span>
+                            </small>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted">
+                                <i class="fas fa-shield-alt me-1"></i>
+                                Nivel de seguridad: 
+                                <span th:if="${rol.nombre == 'ADMIN'}" class="text-danger">Alto</span>
+                                <span th:if="${rol.nombre == 'PROFESOR'}" class="text-warning">Medio</span>
+                                <span th:if="${rol.nombre == 'ESTUDIANTE'}" class="text-success">Bajo</span>
+                            </small>
+                        </div>
+                        <div>
+                            <small class="text-muted">
+                                <i class="fas fa-history me-1"></i>
+                                Última verificación: Hoy
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Impacto del rol -->
+        <div class="card shadow mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-project-diagram me-2"></i>
+                    Impacto del Rol en el Sistema
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-3">
+                    Este rol afecta a <strong th:text="${#lists.size(rol.usuarios)}">1</strong> usuario(s) en el sistema.
+                    Cualquier cambio en los permisos de este rol afectará inmediatamente a todos los usuarios asignados.
+                </p>
+                
+                <div class="alert alert-warning" th:if="${#lists.size(rol.usuarios) > 0}">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Advertencia:</strong> Este rol tiene usuarios asignados. 
+                    Los cambios podrían afectar su acceso al sistema.
+                </div>
+                
+                <div class="alert alert-success" th:if="${#lists.size(rol.usuarios) == 0}">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong>Información:</strong> Este rol no tiene usuarios asignados.
+                    Puede ser modificado o eliminado sin afectar a usuarios existentes.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts específicos para detalle de rol -->
+    <div th:fragment="scripts">
+        <script>
+            // Resaltar usuarios activos/inactivos
+            document.addEventListener('DOMContentLoaded', function() {
+                const rows = document.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    const estadoBadge = row.querySelector('.badge');
+                    if (estadoBadge) {
+                        if (estadoBadge.classList.contains('bg-success')) {
+                            row.style.backgroundColor = 'rgba(28, 200, 138, 0.05)';
+                        } else if (estadoBadge.classList.contains('bg-danger')) {
+                            row.style.backgroundColor = 'rgba(231, 74, 59, 0.05)';
+                        }
+                    }
+                });
+            });
+        </script>
+    </div>
+</body>
+</html>

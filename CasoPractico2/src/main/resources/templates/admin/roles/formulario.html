@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Formulario Rol</title>
+</head>
+<body>
+    <div th:fragment="contenido">
+        <h2 th:text="${modo == 'crear' ? 'Crear Nuevo Rol' : 'Editar Rol'}">
+            Crear Nuevo Rol
+        </h2>
+        
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card shadow">
+                    <div class="card-header" th:classappend="${modo == 'crear' ? 'bg-primary text-white' : 'bg-warning text-white'}">
+                        <h4 class="mb-0">
+                            <i class="fas" th:classappend="${modo == 'crear' ? 'fa-plus-circle' : 'fa-edit'}"></i>
+                            <span class="ms-2" th:text="${modo == 'crear' ? 'Nuevo Rol' : 'Editar Rol'}">
+                                Nuevo Rol
+                            </span>
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/admin/roles/guardar}" th:object="${rol}" method="post" class="needs-validation" novalidate>
+                            <input type="hidden" th:field="*{id}" />
+                            
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label">Nombre del Rol *</label>
+                                <input type="text" th:field="*{nombre}" id="nombre" 
+                                       class="form-control" placeholder="Ej: ADMIN, PROFESOR, ESTUDIANTE"
+                                       required pattern="[A-Z_]+" minlength="3" maxlength="100">
+                                <div class="invalid-feedback">
+                                    El nombre debe estar en mayúsculas, sin espacios y tener al menos 3 caracteres.
+                                </div>
+                                <div class="form-text">
+                                    Usa solo letras mayúsculas y guiones bajos. No uses espacios.
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="descripcion" class="form-label">Descripción *</label>
+                                <textarea th:field="*{descripcion}" id="descripcion" 
+                                          class="form-control" rows="4"
+                                          placeholder="Describe las funciones y permisos de este rol..."
+                                          required minlength="10" maxlength="255"></textarea>
+                                <div class="invalid-feedback">
+                                    Por favor proporciona una descripción detallada del rol (mínimo 10 caracteres).
+                                </div>
+                                <div class="form-text">
+                                    Describe claramente qué puede y no puede hacer un usuario con este rol.
+                                </div>
+                            </div>
+                            
+                            <!-- Permisos del rol -->
+                            <div class="mb-4">
+                                <label class="form-label">Permisos del Rol</label>
+                                <div class="border rounded p-3">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" type="checkbox" id="permisoUsuarios" checked disabled>
+                                                <label class="form-check-label" for="permisoUsuarios">
+                                                    Gestión de Usuarios
+                                                </label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" type="checkbox" id="permisoRoles" checked disabled>
+                                                <label class="form-check-label" for="permisoRoles">
+                                                    Gestión de Roles
+                                                </label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" type="checkbox" id="permisoReportes" checked>
+                                                <label class="form-check-label" for="permisoReportes">
+                                                    Ver Reportes
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" type="checkbox" id="permisoConsultas" checked>
+                                                <label class="form-check-label" for="permisoConsultas">
+                                                    Consultas Avanzadas
+                                                </label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" type="checkbox" id="permisoPerfil" checked disabled>
+                                                <label class="form-check-label" for="permisoPerfil">
+                                                    Ver Perfil Personal
+                                                </label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" type="checkbox" id="permisoDashboard" checked disabled>
+                                                <label class="form-check-label" for="permisoDashboard">
+                                                    Acceso al Dashboard
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <small class="text-muted">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Los permisos marcados con gris son obligatorios para todos los roles.
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Botones de acción -->
+                            <div class="d-flex justify-content-between">
+                                <a th:href="@{/admin/roles}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>
+                                    Cancelar
+                                </a>
+                                <div>
+                                    <button type="reset" class="btn btn-outline-secondary me-2">
+                                        <i class="fas fa-redo me-2"></i>
+                                        Limpiar
+                                    </button>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i>
+                                        <span th:text="${modo == 'crear' ? 'Guardar Rol' : 'Actualizar Rol'}">
+                                            Guardar Rol
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Panel lateral de información -->
+            <div class="col-lg-4">
+                <!-- Información sobre roles existentes -->
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Roles Existentes
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6 class="text-primary">ADMIN</h6>
+                            <p class="small text-muted mb-2">
+                                Acceso completo al sistema. Puede gestionar usuarios, roles y ver todas las secciones.
+                            </p>
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="text-info">PROFESOR</h6>
+                            <p class="small text-muted mb-2">
+                                Puede ver reportes y realizar consultas avanzadas. No puede gestionar usuarios ni roles.
+                            </p>
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="text-success">ESTUDIANTE</h6>
+                            <p class="small text-muted mb-0">
+                                Acceso limitado. Solo puede ver su perfil personal.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Consejos para crear roles -->
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            Consejos
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="mb-0">
+                            <li class="mb-2">
+                                <small>
+                                    <i class="fas fa-check text-success me-1"></i>
+                                    Usa nombres descriptivos en MAYÚSCULAS
+                                </small>
+                            </li>
+                            <li class="mb-2">
+                                <small>
+                                    <i class="fas fa-check text-success me-1"></i>
+                                    Describe claramente las funciones
+                                </small>
+                            </li>
+                            <li class="mb-2">
+                                <small>
+                                    <i class="fas fa-check text-success me-1"></i>
+                                    Asigna solo los permisos necesarios
+                                </small>
+                            </li>
+                            <li class="mb-2">
+                                <small>
+                                    <i class="fas fa-check text-success me-1"></i>
+                                    No elimines roles con usuarios asignados
+                                </small>
+                            </li>
+                            <li>
+                                <small>
+                                    <i class="fas fa-check text-success me-1"></i>
+                                    Los roles ADMIN, PROFESOR y ESTUDIANTE son del sistema
+                                </small>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Validación del nombre -->
+                <div class="card shadow mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Validación
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-2">
+                            <small class="text-muted">
+                                <i class="fas" id="nombreValidoIcon"></i>
+                                <span id="nombreValidoText">Nombre válido</span>
+                            </small>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted">
+                                <i class="fas" id="descripcionValidaIcon"></i>
+                                <span id="descripcionValidaText">Descripción válida</span>
+                            </small>
+                        </div>
+                        <div>
+                            <small class="text-muted">
+                                <i class="fas fa-check text-success me-1"></i>
+                                <span>Formulario completo</span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts específicos para formulario de roles -->
+    <div th:fragment="scripts">
+        <script>
+            // Validación en tiempo real
+            const nombreInput = document.getElementById('nombre');
+            const descripcionInput = document.getElementById('descripcion');
+            const nombreValidoIcon = document.getElementById('nombreValidoIcon');
+            const nombreValidoText = document.getElementById('nombreValidoText');
+            const descripcionValidaIcon = document.getElementById('descripcionValidaIcon');
+            const descripcionValidaText = document.getElementById('descripcionValidaText');
+            
+            function validarNombre() {
+                const valor = nombreInput.value;
+                const esValido = /^[A-Z_]+$/.test(valor) && valor.length >= 3;
+                
+                if (valor.length === 0) {
+                    nombreValidoIcon.className = 'fas fa-circle text-secondary me-1';
+                    nombreValidoText.textContent = 'Ingresa un nombre';
+                } else if (esValido) {
+                    nombreValidoIcon.className = 'fas fa-check-circle text-success me-1';
+                    nombreValidoText.textContent = 'Nombre válido';
+                } else {
+                    nombreValidoIcon.className = 'fas fa-times-circle text-danger me-1';
+                    nombreValidoText.textContent = 'Solo mayúsculas y guiones bajos';
+                }
+            }
+            
+            function validarDescripcion() {
+                const valor = descripcionInput.value;
+                const esValida = valor.length >= 10;
+                
+                if (valor.length === 0) {
+                    descripcionValidaIcon.className = 'fas fa-circle text-secondary me-1';
+                    descripcionValidaText.textContent = 'Ingresa una descripción';
+                } else if (esValida) {
+                    descripcionValidaIcon.className = 'fas fa-check-circle text-success me-1';
+                    descripcionValidaText.textContent = 'Descripción válida';
+                } else {
+                    descripcionValidaIcon.className = 'fas fa-times-circle text-danger me-1';
+                    descripcionValidaText.textContent = 'Mínimo 10 caracteres';
+                }
+            }
+            
+            // Convertir automáticamente a mayúsculas
+            nombreInput.addEventListener('input', function() {
+                this.value = this.value.toUpperCase();
+                validarNombre();
+            });
+            
+            descripcionInput.addEventListener('input', validarDescripcion);
+            
+            // Validación inicial
+            validarNombre();
+            validarDescripcion();
+            
+            // Validación del formulario
+            const form = document.querySelector('.needs-validation');
+            if (form) {
+                form.addEventListener('submit', function(event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                });
+            }
+        </script>
+    </div>
+</body>
+</html>

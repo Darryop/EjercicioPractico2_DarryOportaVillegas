@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Consultas Avanzadas</title>
+</head>
+<body>
+    <div th:fragment="contenido">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header bg-info text-white">
+                        <h4 class="mb-0">
+                            <i class="fas fa-search me-2"></i>
+                            Consultas Avanzadas
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <p class="lead">
+                            Realiza consultas avanzadas sobre los usuarios del sistema.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Formulario de Búsqueda -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-filter me-2"></i>
+                            Filtros de Búsqueda
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/consultas/avanzadas}" method="get" class="row g-3">
+                            <!-- Buscar por Rol -->
+                            <div class="col-md-4">
+                                <label for="rol" class="form-label">Filtrar por Rol</label>
+                                <select id="rol" name="rol" class="form-select">
+                                    <option value="">Todos los roles</option>
+                                    <option value="ADMIN" th:selected="${rolSeleccionado == 'ADMIN'}">Administrador</option>
+                                    <option value="PROFESOR" th:selected="${rolSeleccionado == 'PROFESOR'}">Profesor</option>
+                                    <option value="ESTUDIANTE" th:selected="${rolSeleccionado == 'ESTUDIANTE'}">Estudiante</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Buscar por Rango de Fechas -->
+                            <div class="col-md-4">
+                                <label for="fechaInicio" class="form-label">Fecha Inicio</label>
+                                <input type="datetime-local" id="fechaInicio" name="fechaInicio" 
+                                       class="form-control" th:value="${fechaInicio}">
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label for="fechaFin" class="form-label">Fecha Fin</label>
+                                <input type="datetime-local" id="fechaFin" name="fechaFin" 
+                                       class="form-control" th:value="${fechaFin}">
+                            </div>
+                            
+                            <!-- Buscar por Término -->
+                            <div class="col-md-8">
+                                <label for="termino" class="form-label">Buscar por nombre, apellido o email</label>
+                                <input type="text" id="termino" name="termino" 
+                                       class="form-control" placeholder="Ej: Carlos, ana@correo.com"
+                                       th:value="${terminoBusqueda}">
+                            </div>
+                            
+                            <!-- Botones -->
+                            <div class="col-md-4 d-flex align-items-end">
+                                <div class="d-grid gap-2 d-md-flex">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-search me-2"></i>
+                                        Buscar
+                                    </button>
+                                    <a th:href="@{/consultas/avanzadas}" class="btn btn-secondary">
+                                        <i class="fas fa-redo me-2"></i>
+                                        Limpiar
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Resultados de Consultas -->
+        <div class="row">
+            <!-- Consulta 1: Usuarios por Rol -->
+            <div class="col-lg-6 mb-4" th:if="${usuariosPorRol != null}">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-user-tag me-2"></i>
+                            Usuarios por Rol: <span th:text="${rolSeleccionado}"></span>
+                            <span class="badge bg-primary ms-2" th:text="${#lists.size(usuariosPorRol)}">0</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${not #lists.isEmpty(usuariosPorRol)}" class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nombre</th>
+                                        <th>Email</th>
+                                        <th>Fecha Registro</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="usuario : ${usuariosPorRol}">
+                                        <td th:text="${usuario.id}">1</td>
+                                        <td th:text="${usuario.nombre} + ' ' + ${usuario.apellido}">Carlos Ramírez</td>
+                                        <td th:text="${usuario.email}">c.ramirez@correo.com</td>
+                                        <td class="fecha-formateada" th:text="${usuario.fechaCreacion}">01/01/2023</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div th:if="${#lists.isEmpty(usuariosPorRol)}" class="text-center py-3">
+                            <i class="fas fa-search fa-2x text-muted mb-3"></i>
+                            <p class="text-muted">No se encontraron usuarios con este rol</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Consulta 2: Usuarios por Rango de Fechas -->
+            <div class="col-lg-6 mb-4" th:if="${usuariosPorFecha != null}">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            Usuarios por Rango de Fechas
+                            <span class="badge bg-primary ms-2" th:text="${#lists.size(usuariosPorFecha)}">0</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${not #lists.isEmpty(usuariosPorFecha)}" class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nombre</th>
+                                        <th>Rol</th>
+                                        <th>Fecha Registro</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="usuario : ${usuariosPorFecha}">
+                                        <td th:text="${usuario.id}">1</td>
+                                        <td th:text="${usuario.nombre} + ' ' + ${usuario.apellido}">Carlos Ramírez</td>
+                                        <td>
+                                            <span class="badge bg-info" th:text="${usuario.rol.nombre}">ADMIN</span>
+                                        </td>
+                                        <td class="fecha-formateada" th:text="${usuario.fechaCreacion}">01/01/2023</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div th:if="${#lists.isEmpty(usuariosPorFecha)}" class="text-center py-3">
+                            <i class="fas fa-search fa-2x text-muted mb-3"></i>
+                            <p class="text-muted">No se encontraron usuarios en este rango de fechas</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Consulta 3: Usuarios por Término -->
+            <div class="col-lg-6 mb-4" th:if="${usuariosPorTermino != null}">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-search me-2"></i>
+                            Búsqueda: "<span th:text="${terminoBusqueda}"></span>"
+                            <span class="badge bg-primary ms-2" th:text="${#lists.size(usuariosPorTermino)}">0</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${not #lists.isEmpty(usuariosPorTermino)}" class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nombre</th>
+                                        <th>Email</th>
+                                        <th>Rol</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="usuario : ${usuariosPorTermino}">
+                                        <td th:text="${usuario.id}">1</td>
+                                        <td th:text="${usuario.nombre} + ' ' + ${usuario.apellido}">Carlos Ramírez</td>
+                                        <td th:text="${usuario.email}">c.ramirez@correo.com</td>
+                                        <td>
+                                            <span class="badge" 
+                                                  th:classappend="${usuario.rol.nombre == 'ADMIN' ? 'bg-primary' : 
+                                                                  usuario.rol.nombre == 'PROFESOR' ? 'bg-info' : 
+                                                                  'bg-success'}"
+                                                  th:text="${usuario.rol.nombre}">ADMIN</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div th:if="${#lists.isEmpty(usuariosPorTermino)}" class="text-center py-3">
+                            <i class="fas fa-search fa-2x text-muted mb-3"></i>
+                            <p class="text-muted">No se encontraron usuarios con este término</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Consulta 4: Últimos Usuarios Registrados -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-sort-amount-down me-2"></i>
+                            Últimos Usuarios Registrados
+                            <span class="badge bg-primary ms-2" th:text="${#lists.size(usuariosOrdenados)}">0</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${not #lists.isEmpty(usuariosOrdenados)}" class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nombre</th>
+                                        <th>Rol</th>
+                                        <th>Fecha Registro</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="usuario : ${usuariosOrdenados}">
+                                        <td th:text="${usuario.id}">1</td>
+                                        <td th:text="${usuario.nombre} + ' ' + ${usuario.apellido}">Carlos Ramírez</td>
+                                        <td>
+                                            <span class="badge" 
+                                                  th:classappend="${usuario.rol.nombre == 'ADMIN' ? 'bg-primary' : 
+                                                                  usuario.rol.nombre == 'PROFESOR' ? 'bg-info' : 
+                                                                  'bg-success'}"
+                                                  th:text="${usuario.rol.nombre}">ADMIN</span>
+                                        </td>
+                                        <td class="fecha-formateada" th:text="${usuario.fechaCreacion}">01/01/2023</td>
+                                        <td>
+                                            <span th:if="${usuario.activo}" class="badge bg-success">Activo</span>
+                                            <span th:unless="${usuario.activo}" class="badge bg-danger">Inactivo</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Estadísticas -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-pie me-2"></i>
+                            Estadísticas del Sistema
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-3 mb-3">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <i class="fas fa-users fa-2x text-primary mb-3"></i>
+                                        <h3 th:text="${totalActivos}">0</h3>
+                                        <p class="text-muted mb-0">Usuarios Activos</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <i class="fas fa-user-slash fa-2x text-danger mb-3"></i>
+                                        <h3 th:text="${totalInactivos}">0</h3>
+                                        <p class="text-muted mb-0">Usuarios Inactivos</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <i class="fas fa-user-tag fa-2x text-success mb-3"></i>
+                                        <h3>3</h3>
+                                        <p class="text-muted mb-0">Roles Disponibles</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <i class="fas fa-percentage fa-2x text-info mb-3"></i>
+                                        <h3 th:text="${totalActivos + totalInactivos > 0 ? 
+                                                       ((totalActivos * 100) / (totalActivos + totalInactivos)) : 0}">0</h3>
+                                        <p class="text-muted mb-0">% Activos</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts específicos para consultas -->
+    <div th:fragment="scripts">
+        <script>
+            // Establecer fechas por defecto para el formulario
+            document.addEventListener('DOMContentLoaded', function() {
+                // Establecer fecha fin como hoy
+                const now = new Date();
+                const fechaFin = now.toISOString().slice(0, 16);
+                if (!document.getElementById('fechaFin').value) {
+                    document.getElementById('fechaFin').value = fechaFin;
+                }
+                
+                // Establecer fecha inicio como hace 30 días
+                const thirtyDaysAgo = new Date(now);
+                thirtyDaysAgo.setDate(now.getDate() - 30);
+                const fechaInicio = thirtyDaysAgo.toISOString().slice(0, 16);
+                if (!document.getElementById('fechaInicio').value) {
+                    document.getElementById('fechaInicio').value = fechaInicio;
+                }
+            });
+        </script>
+    </div>
+</body>
+</html>

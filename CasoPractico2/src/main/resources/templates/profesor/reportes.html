@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Reportes</title>
+</head>
+<body>
+    <div th:fragment="contenido">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header bg-info text-white">
+                        <h4 class="mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            Reportes del Sistema
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <p class="lead">
+                            <i class="fas fa-user-tie me-2"></i>
+                            Bienvenido al módulo de reportes para profesores.
+                        </p>
+                        <p class="text-muted">
+                            Aquí podrás generar y visualizar reportes sobre la actividad del sistema.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- Reporte 1: Distribución de Usuarios por Rol -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-pie me-2"></i>
+                            Distribución de Usuarios por Rol
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center py-4">
+                            <canvas id="rolChart" width="400" height="200"></canvas>
+                        </div>
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="h4 text-primary" id="adminCount">0</div>
+                                <small class="text-muted">Administradores</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="h4 text-success" id="profesorCount">0</div>
+                                <small class="text-muted">Profesores</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="h4 text-warning" id="estudianteCount">0</div>
+                                <small class="text-muted">Estudiantes</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Reporte 2: Estado de Usuarios -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            Estado de Usuarios
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center py-4">
+                            <canvas id="estadoChart" width="400" height="200"></canvas>
+                        </div>
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="h4 text-success" id="activosCount">0</div>
+                                <small class="text-muted">Usuarios Activos</small>
+                            </div>
+                            <div class="col-6">
+                                <div class="h4 text-danger" id="inactivosCount">0</div>
+                                <small class="text-muted">Usuarios Inactivos</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Reporte 3: Registros por Mes -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-line me-2"></i>
+                            Registros por Mes (Últimos 6 meses)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center">
+                            <canvas id="registrosChart" width="800" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Información General -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Información General del Sistema
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                                        <h4 class="card-title" id="totalUsuarios">0</h4>
+                                        <p class="card-text text-muted">Usuarios Totales</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-user-check fa-3x text-success mb-3"></i>
+                                        <h4 class="card-title" id="promedioActivos">0%</h4>
+                                        <p class="card-text text-muted">Porcentaje Activos</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-calendar-alt fa-3x text-info mb-3"></i>
+                                        <h4 class="card-title" id="registrosHoy">0</h4>
+                                        <p class="card-text text-muted">Registros Hoy</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts específicos para reportes -->
+    <div th:fragment="scripts">
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Datos simulados (en producción vendrían del servidor)
+                const data = {
+                    roles: {
+                        admin: 2,
+                        profesor: 5,
+                        estudiante: 25
+                    },
+                    estados: {
+                        activos: 28,
+                        inactivos: 4
+                    },
+                    registrosMensuales: [5, 8, 12, 15, 10, 7],
+                    totalUsuarios: 32,
+                    registrosHoy: 2
+                };
+                
+                // Actualizar contadores
+                document.getElementById('adminCount').textContent = data.roles.admin;
+                document.getElementById('profesorCount').textContent = data.roles.profesor;
+                document.getElementById('estudianteCount').textContent = data.roles.estudiante;
+                document.getElementById('activosCount').textContent = data.estados.activos;
+                document.getElementById('inactivosCount').textContent = data.estados.inactivos;
+                document.getElementById('totalUsuarios').textContent = data.totalUsuarios;
+                document.getElementById('registrosHoy').textContent = data.registrosHoy;
+                
+                // Calcular porcentaje de activos
+                const porcentajeActivos = Math.round((data.estados.activos / data.totalUsuarios) * 100);
+                document.getElementById('promedioActivos').textContent = porcentajeActivos + '%';
+                
+                // Gráfico de distribución por rol
+                const rolCtx = document.getElementById('rolChart').getContext('2d');
+                new Chart(rolCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Administradores', 'Profesores', 'Estudiantes'],
+                        datasets: [{
+                            data: [data.roles.admin, data.roles.profesor, data.roles.estudiante],
+                            backgroundColor: ['#4e73df', '#1cc88a', '#f6c23e'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+                
+                // Gráfico de estado de usuarios
+                const estadoCtx = document.getElementById('estadoChart').getContext('2d');
+                new Chart(estadoCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Activos', 'Inactivos'],
+                        datasets: [{
+                            label: 'Usuarios',
+                            data: [data.estados.activos, data.estados.inactivos],
+                            backgroundColor: ['#1cc88a', '#e74a3b'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 5
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // Gráfico de registros por mes
+                const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'];
+                const registrosCtx = document.getElementById('registrosChart').getContext('2d');
+                new Chart(registrosCtx, {
+                    type: 'line',
+                    data: {
+                        labels: meses,
+                        datasets: [{
+                            label: 'Registros',
+                            data: data.registrosMensuales,
+                            borderColor: '#4e73df',
+                            backgroundColor: 'rgba(78, 115, 223, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 5
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+        </script>
+    </div>
+</body>
+</html>

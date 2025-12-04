@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Mi Perfil</title>
+</head>
+<body>
+    <div th:fragment="contenido">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0">
+                            <i class="fas fa-user me-2"></i>
+                            Mi Perfil
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Información del Usuario -->
+                            <div class="col-md-8">
+                                <h5 class="mb-3">Información Personal</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-borderless">
+                                        <tbody>
+                                            <tr>
+                                                <th width="30%">Nombre Completo:</th>
+                                                <td>
+                                                    <span th:text="${usuario.nombre} + ' ' + ${usuario.apellido}">Carlos Ramírez</span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>Correo Electrónico:</th>
+                                                <td th:text="${usuario.email}">c.ramirez@correo.com</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Rol:</th>
+                                                <td>
+                                                    <span class="badge" 
+                                                          th:classappend="${usuario.rol.nombre == 'ADMIN' ? 'bg-primary' : 
+                                                                          usuario.rol.nombre == 'PROFESOR' ? 'bg-info' : 
+                                                                          'bg-success'}"
+                                                          th:text="${usuario.rol.nombre}">ESTUDIANTE</span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>Estado:</th>
+                                                <td>
+                                                    <span th:if="${usuario.activo}" class="badge bg-success">Activo</span>
+                                                    <span th:unless="${usuario.activo}" class="badge bg-danger">Inactivo</span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>Fecha de Registro:</th>
+                                                <td class="fecha-formateada" th:text="${usuario.fechaCreacion}">01/01/2023</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Miembro desde:</th>
+                                                <td>
+                                                    <span th:if="${usuario.fechaCreacion}">
+                                                        <span th:text="${#dates.createNow().year - #dates.year(usuario.fechaCreacion)}">1</span> año(s)
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <!-- Descripción del Rol -->
+                                <div class="card mt-4">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Permisos y Funciones
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="mb-2" th:if="${usuario.rol.nombre == 'ESTUDIANTE'}">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            Como estudiante, puedes acceder a tu perfil personal y ver tu información académica.
+                                        </p>
+                                        <p class="mb-2" th:if="${usuario.rol.nombre == 'PROFESOR'}">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            Como profesor, puedes acceder a reportes, consultas avanzadas y gestionar información académica.
+                                        </p>
+                                        <p class="mb-2" th:if="${usuario.rol.nombre == 'ADMIN'}">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            Como administrador, tienes acceso completo al sistema, incluyendo gestión de usuarios y roles.
+                                        </p>
+                                        <p class="text-muted mb-0">
+                                            <small>
+                                                <i class="fas fa-shield-alt me-1"></i>
+                                                Tu información está protegida bajo las políticas de seguridad del sistema.
+                                            </small>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Avatar y Acciones -->
+                            <div class="col-md-4">
+                                <div class="text-center mb-4">
+                                    <div class="avatar-placeholder mx-auto mb-3">
+                                        <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center" 
+                                             style="width: 150px; height: 150px; font-size: 4rem; color: white;">
+                                            <span th:text="${usuario.nombre.substring(0,1).toUpperCase()}">C</span>
+                                        </div>
+                                    </div>
+                                    <h5 th:text="${usuario.nombre} + ' ' + ${usuario.apellido}">Carlos Ramírez</h5>
+                                    <p class="text-muted" th:text="${usuario.email}">c.ramirez@correo.com</p>
+                                    
+                                    <!-- Estado de la cuenta -->
+                                    <div class="mb-3">
+                                        <span th:if="${usuario.activo}" class="badge bg-success p-2">
+                                            <i class="fas fa-check-circle me-1"></i> Cuenta Activa
+                                        </span>
+                                        <span th:unless="${usuario.activo}" class="badge bg-danger p-2">
+                                            <i class="fas fa-times-circle me-1"></i> Cuenta Inactiva
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Acciones Rápidas -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-bolt me-2"></i>
+                                            Acciones Rápidas
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-grid gap-2">
+                                            <button class="btn btn-outline-primary btn-sm" disabled>
+                                                <i class="fas fa-edit me-2"></i>
+                                                Editar Perfil
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm" disabled>
+                                                <i class="fas fa-key me-2"></i>
+                                                Cambiar Contraseña
+                                            </button>
+                                            <a th:href="@{/dashboard}" class="btn btn-outline-info btn-sm">
+                                                <i class="fas fa-tachometer-alt me-2"></i>
+                                                Volver al Dashboard
+                                            </a>
+                                            <form th:action="@{/logout}" method="post" class="d-grid">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                    <i class="fas fa-sign-out-alt me-2"></i>
+                                                    Cerrar Sesión
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Información de Seguridad -->
+                                <div class="card mt-3">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-shield-alt me-2"></i>
+                                            Seguridad
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-2">
+                                            <small class="text-muted">
+                                                <i class="fas fa-lock me-1"></i>
+                                                Último inicio de sesión: Hoy
+                                            </small>
+                                        </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted">
+                                                <i class="fas fa-clock me-1"></i>
+                                                Sesión activa: <span id="sessionTimer">00:00</span>
+                                            </small>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted">
+                                                <i class="fas fa-user-shield me-1"></i>
+                                                Autenticación: <span sec:authentication="principal.authorities"></span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Información Adicional -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-history me-2"></i>
+                            Actividad Reciente
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center py-5">
+                            <i class="fas fa-clock fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No hay actividad registrada</h5>
+                            <p class="text-muted">
+                                Tu actividad en el sistema aparecerá aquí.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts específicos para perfil -->
+    <div th:fragment="scripts">
+        <script>
+            // Temporizador de sesión
+            let sessionSeconds = 0;
+            const sessionTimer = document.getElementById('sessionTimer');
+            
+            function updateSessionTimer() {
+                sessionSeconds++;
+                const minutes = Math.floor(sessionSeconds / 60);
+                const seconds = sessionSeconds % 60;
+                sessionTimer.textContent = 
+                    minutes.toString().padStart(2, '0') + ':' + 
+                    seconds.toString().padStart(2, '0');
+            }
+            
+            setInterval(updateSessionTimer, 1000);
+            
+            // Generar avatar con colores basados en el nombre
+            function generateAvatarColor(name) {
+                const colors = [
+                    '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', 
+                    '#e74a3b', '#6f42c1', '#20c9a6', '#fd7e14'
+                ];
+                let hash = 0;
+                for (let i = 0; i < name.length; i++) {
+                    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+                }
+                const index = Math.abs(hash) % colors.length;
+                return colors[index];
+            }
+            
+            // Aplicar color al avatar
+            const avatarElement = document.querySelector('.avatar-placeholder div');
+            if (avatarElement) {
+                const userName = document.querySelector('h5').textContent;
+                const color = generateAvatarColor(userName);
+                avatarElement.style.backgroundColor = color;
+            }
+        </script>
+    </div>
+</body>
+</html>

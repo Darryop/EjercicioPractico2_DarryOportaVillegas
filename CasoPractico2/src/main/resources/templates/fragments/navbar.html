@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <!-- Navbar Fragment -->
+    <div th:fragment="navbar"></div>
+    
+    <!-- Sidebar Fragment -->
+    <div th:fragment="sidebar">
+        <div class="sidebar">
+            <div class="sidebar-sticky pt-3">
+                <ul class="nav flex-column">
+                    <!-- Dashboard -->
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link" th:href="@{/dashboard}" th:classappend="${titulo == 'Dashboard' ? 'active' : ''}">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span class="ms-2">Dashboard</span>
+                        </a>
+                    </li>
+                    
+                    <!-- Gestión de Usuarios (Solo Admin) -->
+                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                        <a class="nav-link" th:href="@{/admin/usuarios}" th:classappend="${titulo == 'Usuarios' ? 'active' : ''}">
+                            <i class="fas fa-users"></i>
+                            <span class="ms-2">Gestión de Usuarios</span>
+                        </a>
+                    </li>
+                    
+                    <!-- Gestión de Roles (Solo Admin) -->
+                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                        <a class="nav-link" th:href="@{/admin/roles}" th:classappend="${titulo == 'Roles' ? 'active' : ''}">
+                            <i class="fas fa-user-tag"></i>
+                            <span class="ms-2">Gestión de Roles</span>
+                        </a>
+                    </li>
+                    
+                    <!-- Reportes (Profesor y Admin) -->
+                    <li class="nav-item" sec:authorize="hasAnyRole('PROFESOR', 'ADMIN')">
+                        <a class="nav-link" th:href="@{/profesor/reportes}" th:classappend="${titulo == 'Reportes' ? 'active' : ''}">
+                            <i class="fas fa-chart-bar"></i>
+                            <span class="ms-2">Reportes</span>
+                        </a>
+                    </li>
+                    
+                    <!-- Consultas Avanzadas (Profesor y Admin) -->
+                    <li class="nav-item" sec:authorize="hasAnyRole('PROFESOR', 'ADMIN')">
+                        <a class="nav-link" th:href="@{/consultas/avanzadas}" th:classappend="${titulo == 'Consultas' ? 'active' : ''}">
+                            <i class="fas fa-search"></i>
+                            <span class="ms-2">Consultas Avanzadas</span>
+                        </a>
+                    </li>
+                    
+                    <!-- Perfil (Todos los usuarios autenticados) -->
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link" th:href="@{/estudiante/perfil}" th:classappend="${titulo == 'Mi Perfil' ? 'active' : ''}">
+                            <i class="fas fa-user"></i>
+                            <span class="ms-2" sec:authorize="hasRole('ESTUDIANTE')">Mi Perfil</span>
+                            <span class="ms-2" sec:authorize="hasRole('PROFESOR')">Perfil del Profesor</span>
+                            <span class="ms-2" sec:authorize="hasRole('ADMIN')">Perfil del Administrador</span>
+                        </a>
+                    </li>
+                    
+                    <!-- Separador -->
+                    <hr class="my-3">
+                    
+                    <!-- Información del Sistema -->
+                    <li class="nav-item">
+                        <div class="nav-link text-muted">
+                            <small>
+                                <i class="fas fa-info-circle me-1"></i>
+                                <span>Versión 1.0.0</span>
+                            </small>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

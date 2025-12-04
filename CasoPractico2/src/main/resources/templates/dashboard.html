@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+</head>
+<body>
+    <!-- Fragmento de contenido para el layout -->
+    <div th:fragment="contenido">
+        <!-- Dashboard Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            Dashboard
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Bienvenido, <span sec:authentication="name"></span></h5>
+                                <p class="text-muted">
+                                    <i class="fas fa-user-tag me-1"></i>
+                                    Rol: <span sec:authentication="principal.authorities"></span>
+                                </p>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <p class="text-muted">
+                                    <i class="fas fa-calendar-alt me-1"></i>
+                                    <span th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy HH:mm')}"></span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Estadísticas -->
+        <div class="row mb-4">
+            <!-- Usuarios Totales -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    Usuarios Totales
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${totalUsuarios}">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-users fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Usuarios Activos -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    Usuarios Activos
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${usuariosActivos}">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-user-check fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Roles -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                    Roles del Sistema
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${totalRoles}">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-user-tag fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Usuarios Nuevos (Este Mes) -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-warning shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                    Nuevos (Este Mes)
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${nuevosEsteMes}">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-user-plus fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Acciones Rápidas -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-bolt me-2"></i>
+                            Acciones Rápidas
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Solo Admin -->
+                            <div class="col-md-4 mb-3" sec:authorize="hasRole('ADMIN')">
+                                <a th:href="@{/admin/usuarios/nuevo}" class="card card-hover text-decoration-none">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
+                                        <h5 class="card-title">Nuevo Usuario</h5>
+                                        <p class="card-text text-muted">Crear un nuevo usuario en el sistema</p>
+                                    </div>
+                                </a>
+                            </div>
+                            
+                            <!-- Solo Admin -->
+                            <div class="col-md-4 mb-3" sec:authorize="hasRole('ADMIN')">
+                                <a th:href="@{/admin/roles/nuevo}" class="card card-hover text-decoration-none">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-user-tag fa-3x text-success mb-3"></i>
+                                        <h5 class="card-title">Nuevo Rol</h5>
+                                        <p class="card-text text-muted">Definir un nuevo rol de usuario</p>
+                                    </div>
+                                </a>
+                            </div>
+                            
+                            <!-- Profesor y Admin -->
+                            <div class="col-md-4 mb-3" sec:authorize="hasAnyRole('PROFESOR', 'ADMIN')">
+                                <a th:href="@{/consultas/avanzadas}" class="card card-hover text-decoration-none">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-search fa-3x text-info mb-3"></i>
+                                        <h5 class="card-title">Consultas</h5>
+                                        <p class="card-text text-muted">Realizar consultas avanzadas</p>
+                                    </div>
+                                </a>
+                            </div>
+                            
+                            <!-- Todos los usuarios autenticados -->
+                            <div class="col-md-4 mb-3" sec:authorize="isAuthenticated()">
+                                <a th:href="@{/estudiante/perfil}" class="card card-hover text-decoration-none">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-user-edit fa-3x text-warning mb-3"></i>
+                                        <h5 class="card-title">Mi Perfil</h5>
+                                        <p class="card-text text-muted">Ver y editar mi información personal</p>
+                                    </div>
+                                </a>
+                            </div>
+                            
+                            <!-- Profesor y Admin -->
+                            <div class="col-md-4 mb-3" sec:authorize="hasAnyRole('PROFESOR', 'ADMIN')">
+                                <a th:href="@{/profesor/reportes}" class="card card-hover text-decoration-none">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-chart-pie fa-3x text-danger mb-3"></i>
+                                        <h5 class="card-title">Reportes</h5>
+                                        <p class="card-text text-muted">Generar reportes del sistema</p>
+                                    </div>
+                                </a>
+                            </div>
+                            
+                            <!-- Todos los usuarios autenticados -->
+                            <div class="col-md-4 mb-3" sec:authorize="isAuthenticated()">
+                                <form th:action="@{/logout}" method="post" class="h-100">
+                                    <button type="submit" class="card card-hover text-decoration-none w-100 h-100 border-0 bg-transparent">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-sign-out-alt fa-3x text-secondary mb-3"></i>
+                                            <h5 class="card-title">Cerrar Sesión</h5>
+                                            <p class="card-text text-muted">Salir de la plataforma</p>
+                                        </div>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Últimos Usuarios Registrados -->
+        <div class="row" sec:authorize="hasAnyRole('ADMIN', 'PROFESOR')">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-history me-2"></i>
+                            Últimos Usuarios Registrados
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive" th:if="${not #lists.isEmpty(ultimosUsuarios)}">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nombre</th>
+                                        <th>Email</th>
+                                        <th>Rol</th>
+                                        <th>Fecha Registro</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="usuario : ${ultimosUsuarios}">
+                                        <td th:text="${usuario.id}">1</td>
+                                        <td>
+                                            <span th:text="${usuario.nombre} + ' ' + ${usuario.apellido}">Carlos Ramírez</span>
+                                        </td>
+                                        <td th:text="${usuario.email}">c.ramirez@correo.com</td>
+                                        <td>
+                                            <span class="badge" 
+                                                  th:classappend="${usuario.rol.nombre == 'ADMIN' ? 'bg-primary' : 
+                                                                  usuario.rol.nombre == 'PROFESOR' ? 'bg-info' : 
+                                                                  'bg-success'}"
+                                                  th:text="${usuario.rol.nombre}">ADMIN</span>
+                                        </td>
+                                        <td class="fecha-formateada" th:text="${usuario.fechaCreacion}">01/01/2023</td>
+                                        <td>
+                                            <span th:if="${usuario.activo}" class="badge bg-success">Activo</span>
+                                            <span th:unless="${usuario.activo}" class="badge bg-danger">Inactivo</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div th:if="${#lists.isEmpty(ultimosUsuarios)}" class="text-center py-5">
+                            <i class="fas fa-users-slash fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No hay usuarios registrados</h5>
+                            <p class="text-muted">Comienza creando el primer usuario</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Información del Sistema -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Información del Sistema
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Versión y Tecnologías</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-code me-2 text-primary"></i>Spring Boot 3.x</li>
+                                    <li><i class="fas fa-database me-2 text-success"></i>MySQL 8.x</li>
+                                    <li><i class="fas fa-shield-alt me-2 text-warning"></i>Spring Security</li>
+                                    <li><i class="fas fa-file-code me-2 text-info"></i>Thymeleaf</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Estadísticas</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-calendar-alt me-2 text-secondary"></i>Sesión iniciada: 
+                                        <span th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy HH:mm')}"></span>
+                                    </li>
+                                    <li><i class="fas fa-user me-2 text-secondary"></i>Usuario: 
+                                        <span sec:authentication="name"></span>
+                                    </li>
+                                    <li><i class="fas fa-user-tag me-2 text-secondary"></i>Rol: 
+                                        <span sec:authentication="principal.authorities"></span>
+                                    </li>
+                                    <li><i class="fas fa-clock me-2 text-secondary"></i>Última actualización: 
+                                        <span th:text="${#dates.format(#dates.createNow(), 'HH:mm:ss')}"></span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts específicos para dashboard -->
+    <div th:fragment="scripts">
+        <script>
+            // Actualizar hora cada segundo
+            function updateTime() {
+                const now = new Date();
+                const timeElement = document.querySelector('.current-time');
+                if (timeElement) {
+                    timeElement.textContent = now.toLocaleTimeString('es-ES');
+                }
+            }
+            
+            setInterval(updateTime, 1000);
+            updateTime();
+            
+            // Animación para las tarjetas de acciones rápidas
+            document.querySelectorAll('.card-hover').forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                    this.style.transition = 'transform 0.3s ease';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+        </script>
+    </div>
+</body>
+</html>
